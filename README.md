@@ -29,3 +29,9 @@
 ## 技術
 
 純靜態：HTML + CSS + Vanilla JavaScript，無任何外部依賴。
+
+## Credit
+
+內容與框架來自 Figma Community：[Design Skills Matrix](https://www.figma.com/community/file/1142203484282738794/design-skills-matrix)
+
+原版在 Figma 上以便條紙操作，拖拉起來較為雜亂，因此將它重新實作為網頁版，操作更直覺。
