@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design Skills Matrix</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="toolbar">
+    <h1 class="site-title">Design Skills Matrix</h1>
+    <div class="toolbar-right">
+      <span class="count-badge" id="countBadge">0 / 84 已放置</span>
+      <button class="btn" id="btnLabels">標籤</button>
+      <button class="btn" id="btnResult">📊 結果模式</button>
+      <button class="btn btn-danger" id="btnReset">重製</button>
+    </div>
+  </header>
+
+  <main class="content">
+
+    <!-- ── Left: Card List ── -->
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <div class="status-hint" id="statusHint">點擊卡片選取，再點矩陣放置</div>
+        <button class="btn-cancel hidden" id="btnCancel">✕ 取消</button>
+      </div>
+      <div class="sidebar-actions">
+        <button class="btn-action" id="btnExpandAll">全部展開</button>
+        <span class="action-sep">·</span>
+        <button class="btn-action" id="btnCollapseAll">全部收合</button>
+      </div>
+      <div class="card-list" id="cardList"></div>
+    </aside>
+
+    <!-- ── Right: Matrix ── -->
+    <section class="matrix-panel">
+      <div class="matrix-outer">
+        <div class="axis-label label-top">WANT TO DO MORE</div>
+        <div class="axis-label label-left"><span>STILL LEARNING</span></div>
+
+        <div class="matrix" id="matrix">
+          <!-- Result mode zone overlays -->
+
+          <!-- TL: Still Learning + Want More -->
+          <div class="zone zone-tl">
+            <p class="zone-quote">"I like this, but I don't know enough yet."</p>
+            <p class="zone-desc">這裡的技能可以優先列為學習目標。在面試中，你能展現對這些領域的既有認識與學習熱忱，也可以用來評估職缺是否符合你的成長方向。</p>
+          </div>
+
+          <!-- TL sub-zone: Danger Zone (near vertical center) -->
+          <div class="zone zone-danger">
+            <p class="zone-quote">⚠️ Watch out for your "Danger Zone"</p>
+            <p class="zone-desc">這些技能雖然令人興奮，但可能讓你分心、偏離日常工作重點。請先制定策略，再有計畫地投入學習，而不是盲目追求。</p>
+          </div>
+
+          <!-- TR: Expert + Want More = Sweet Spot -->
+          <div class="zone zone-tr">
+            <p class="zone-quote">⭐ 甜蜜點 Sweet Spot</p>
+            <p class="zone-desc">請再仔細確認你對這些技能的實際專業程度。許多設計師對自己的技能過度自信——對照各子象限的標準，確認放置位置是否真的準確。</p>
+          </div>
+
+          <!-- BL: Still Learning + Want Less -->
+          <div class="zone zone-bl">
+            <p class="zone-quote">"I don't like this and I don't care."</p>
+            <p class="zone-desc">這些是你不享受、也不想繼續發展的技能。看職位說明時留意這些項目——確保你是在發揮強項，而不是用弱項去滿足職位要求。</p>
+          </div>
+
+          <!-- BR: Expert + Want Less -->
+          <div class="zone zone-br">
+            <p class="zone-quote">"I'm good at this and I will do it if I have to."</p>
+            <p class="zone-desc">這些技能你能做、但沒有熱情。必要時可以支援團隊，在面試中提及這些技能也可成為差異化的競爭亮點。</p>
+          </div>
+
+          <!-- Sweet spot ellipse (Expert + Want More area) -->
+          <div class="sweet-spot-ellipse"></div>
+          <!-- Cherry on top -->
+          <div class="cherry-on-top"></div>
+<div class="spot-label label-cherry">🍒 Cherry on Top<br><span>你最頂尖的技能</span></div>
+
+          <!-- Axes -->
+          <div class="axis axis-h"></div>
+          <div class="axis axis-v"></div>
+
+          <!-- Expert level ticks (right half of x-axis) -->
+          <div class="etick" style="left:62.5%"></div>
+          <div class="etick" style="left:75%"></div>
+          <div class="etick" style="left:87.5%"></div>
+
+          <!-- Expert sublabels -->
+          <div class="elabel" style="left:56.25%">普通</div>
+          <div class="elabel" style="left:68.75%">熟練</div>
+          <div class="elabel" style="left:81.25%">精通</div>
+          <div class="elabel" style="left:93.75%">專家</div>
+
+          <!-- Dots -->
+          <div id="dotsLayer"></div>
+        </div>
+
+        <div class="axis-label label-right"><span>EXPERT AT THIS</span></div>
+        <div class="axis-label label-bottom">WANT TO DO LESS</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Reset confirm -->
+  <div class="overlay hidden" id="overlay">
+    <div class="dialog">
+      <p>確定要清除所有放置紀錄？</p>
+      <div class="dialog-btns">
+        <button class="btn btn-danger" id="btnConfirmReset">確定清除</button>
+        <button class="btn" id="btnCancelReset">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

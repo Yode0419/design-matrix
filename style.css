@@ -1,0 +1,617 @@
+/* ── Reset & Base ───────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --border: #e0e0e0;
+  --bg: #fafafa;
+  --text: #1a1a1a;
+  --muted: #888;
+  --axis: #d0d0d0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  background: #fff;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.hidden { display: none !important; }
+
+/* ── Toolbar ────────────────────────────────────────────────── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 46px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: #fff;
+  z-index: 10;
+}
+
+.site-title { font-size: 14px; font-weight: 600; }
+
+.toolbar-right { display: flex; align-items: center; gap: 8px; }
+
+.count-badge { font-size: 11px; color: var(--muted); }
+
+.btn {
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text);
+  transition: background 0.12s;
+  white-space: nowrap;
+}
+.btn:hover { background: #f3f3f3; }
+.btn.active { background: #111; color: #fff; border-color: #111; }
+.btn-danger { color: #c0392b; border-color: #ddb8b4; }
+.btn-danger:hover { background: #fef4f3; }
+
+.btn-cancel {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11.5px;
+  color: var(--muted);
+  padding: 3px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.btn-cancel:hover { background: #eee; color: var(--text); }
+
+/* ── Content (left + right) ─────────────────────────────────── */
+.content {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Sidebar (left 1/3) ─────────────────────────────────────── */
+.sidebar {
+  width: 33.333%;
+  min-width: 220px;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  min-height: 36px;
+  background: #fafafa;
+  z-index: 20;
+  position: relative;
+}
+
+.sidebar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: #fff;
+  z-index: 20;
+  position: relative;
+}
+
+.btn-action {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--muted);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+.btn-action:hover { background: #f0f0f0; color: var(--text); }
+
+.action-sep { color: var(--border); font-size: 11px; }
+
+.status-hint {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+body.selecting .sidebar-top {
+  background: #fffbf0;
+  border-bottom-color: #f0c040;
+}
+body.selecting .status-hint { color: #8a6800; font-weight: 500; }
+
+/* Card list (scrollable) */
+.card-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 0 12px;
+}
+
+/* Category group */
+.cat-group { }
+
+/* Category header inside card list */
+.cat-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  text-transform: uppercase;
+  position: sticky;
+  top: -1px;
+  background: #fff;
+  z-index: 5;
+  /* shadow instead of border-top so it doesn't double up on scroll */
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 -1px 0 var(--border);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.1s;
+}
+.cat-header:hover { background: #f5f5f5; }
+
+.cat-color-bar {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.cat-label { flex: 1; }
+
+.cat-count {
+  font-weight: 400;
+  opacity: 0.55;
+  font-size: 10.5px;
+}
+
+.cat-chevron {
+  font-size: 11px;
+  opacity: 0.45;
+  transition: transform 0.2s;
+  display: inline-block;
+  margin-left: 2px;
+}
+
+/* Collapsed state */
+.cat-group.collapsed .cat-chevron { transform: rotate(-90deg); }
+.cat-group.collapsed .cat-cards   { display: none; }
+
+/* Category highlight button */
+.cat-hl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  opacity: 0.3;
+  padding: 0 3px;
+  line-height: 1;
+  transition: opacity 0.15s;
+  margin-left: auto;
+}
+.cat-hl-btn:hover { opacity: 0.7; }
+.cat-hl-btn.active { opacity: 1; }
+
+/* Matrix highlight: dim non-matching dots */
+body.cat-highlight .pdot { opacity: 0.12; transition: opacity 0.2s; }
+body.cat-highlight .pdot.cat-match { opacity: 1; }
+
+/* ── Card Item ──────────────────────────────────────────────── */
+.card-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 12px 6px 0;
+  margin: 0;
+  border-left: 4px solid transparent;
+  cursor: pointer;
+  transition: background 0.1s, border-left-color 0.1s;
+  user-select: none;
+}
+.card-item:hover { background: #f5f5f5; }
+
+.card-item.selected {
+  background: #eef4ff;
+  border-left-color: #1a73e8 !important;
+  box-shadow: inset 3px 0 0 #1a73e8;
+}
+
+.card-item.active {
+  background: #fff8e1;
+  border-left-color: #f57c00 !important;
+  box-shadow: inset 3px 0 0 #f57c00;
+  opacity: 1;
+}
+
+.card-item.placed { opacity: 0.55; }
+.card-item.placed:hover { opacity: 0.75; background: #f5f5f5; }
+.card-item.placed.selected { opacity: 1; background: #eef4ff; }
+
+.card-color-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px;
+  margin-left: 12px;
+}
+
+.card-text { flex: 1; min-width: 0; }
+.card-en {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text);
+}
+.card-zh {
+  font-size: 10.5px;
+  color: var(--muted);
+  margin-top: 1px;
+  line-height: 1.3;
+}
+
+.card-placed-mark {
+  font-size: 9px;
+  color: var(--muted);
+  flex-shrink: 0;
+  margin-top: 2px;
+  padding-right: 8px;
+}
+
+/* ── Matrix Panel (right 2/3) ───────────────────────────────── */
+.matrix-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 14px 10px 10px;
+  min-width: 0;
+}
+
+.matrix-outer {
+  flex: 1;
+  display: grid;
+  grid-template-areas:
+    ".    top    ."
+    "left matrix right"
+    ".   bottom  .";
+  grid-template-columns: 62px 1fr 62px;
+  grid-template-rows: 22px 1fr 22px;
+  min-height: 0;
+}
+
+.axis-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #bbb;
+  text-transform: uppercase;
+  user-select: none;
+}
+.label-top    { grid-area: top; }
+.label-bottom { grid-area: bottom; }
+.label-left   { grid-area: left; writing-mode: vertical-rl; transform: rotate(180deg); }
+.label-right  { grid-area: right; writing-mode: vertical-rl; }
+
+/* ── Matrix Canvas ──────────────────────────────────────────── */
+.matrix {
+  grid-area: matrix;
+  position: relative;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  cursor: crosshair;
+  overflow: visible;
+}
+
+/* Axes */
+.axis { position: absolute; background: var(--axis); pointer-events: none; }
+.axis-h { left: 0; right: 0; top: 50%; height: 1px; }
+.axis-v { top: 0; bottom: 0; left: 50%; width: 1px; }
+
+/* Expert ticks */
+.etick {
+  position: absolute;
+  top: calc(50% - 4px);
+  width: 1px;
+  height: 8px;
+  background: #ccc;
+  pointer-events: none;
+}
+
+/* Expert sublabels */
+.elabel {
+  position: absolute;
+  top: calc(50% + 5px);
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: #ccc;
+  pointer-events: none;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* ── Zones (result mode) ────────────────────────────────────── */
+/* ── Quadrant Zone Overlays ─────────────────────────────────── */
+.zone {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s;
+  z-index: 4;
+}
+
+/* Zone positioning */
+.zone-tl { top: 0; left: 0; width: 50%; height: 50%;
+  background: rgba(0,150,136,0.07);
+  border-right: 1px dashed rgba(0,150,136,0.3);
+  border-bottom: 1px dashed rgba(0,150,136,0.2); }
+.zone-tr { top: 0; right: 0; width: 50%; height: 50%;
+  background: rgba(255,152,0,0.07);
+  border-left: 1px dashed rgba(255,152,0,0.3);
+  border-bottom: 1px dashed rgba(255,152,0,0.2); }
+.zone-bl { bottom: 0; left: 0; width: 50%; height: 50%;
+  background: rgba(229,57,53,0.05);
+  border-right: 1px dashed rgba(229,57,53,0.3);
+  border-top: 1px dashed rgba(229,57,53,0.2); }
+.zone-br { bottom: 0; right: 0; width: 50%; height: 50%;
+  background: rgba(60,93,212,0.04);
+  border-left: 1px dashed rgba(60,93,212,0.25);
+  border-top: 1px dashed rgba(60,93,212,0.18); }
+
+/* Danger Zone: right portion of TL, adjacent to vertical center axis */
+.zone-danger {
+  top: 0%;
+  left: 25%;
+  width: 15%;
+  height: 50%;
+  background: rgba(255, 152, 0, 0.08);
+  border: 1.5px dashed rgba(255, 152, 0, 0.6);
+  border-radius: 6px;
+  justify-content: flex-start;
+  padding-top: 8px;
+}
+
+/* Zone text */
+.zone-quote {
+  font-size: 10.5px;
+  font-weight: 600;
+  font-style: italic;
+  text-align: center;
+  line-height: 1.4;
+  color: #333;
+  opacity: 0.72;
+  padding: 0 4px;
+}
+
+.zone-danger .zone-quote {
+  font-style: normal;
+  font-size: 10px;
+  opacity: 0.85;
+}
+
+.zone-desc {
+  font-size: 9px;
+  line-height: 1.55;
+  color: #444;
+  text-align: center;
+  padding: 5px 4px 0;
+  opacity: 0;
+  transition: opacity 0.18s;
+  max-width: 95%;
+}
+
+/* In result mode: zones appear and become hoverable */
+body.result-mode .zone {
+  opacity: 1;
+  pointer-events: auto;
+  cursor: default;
+}
+
+body.result-mode .zone:hover { z-index: 8; }
+body.result-mode .zone:hover .zone-desc { opacity: 0.88; }
+
+/* ── Sweet Spot Ellipse ──────────────────────────────────────── */
+/* Large oval covering most of matrix — matches Figma "sweet spot" area */
+.sweet-spot-ellipse {
+  position: absolute;
+  left: 25%;
+  top: 0%;
+  width: 55%;
+  height: 55%;
+  border-radius: 50%;
+  background: rgba(100, 195, 220, 0.07);
+  border: 1.5px solid rgba(80, 170, 200, 0.35);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s;
+  z-index: 3;
+}
+
+/* Cherry on top — smaller pink circle, upper-right Expert corner */
+.cherry-on-top {
+  position: absolute;
+  right: 20%;
+  top: 0%;
+  width: 16%;
+  height: 22%;
+  border-radius: 50%;
+  background: rgba(240, 90, 120, 0.12);
+  border: 1.5px solid rgba(240, 90, 120, 0.4);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s;
+  z-index: 4;
+}
+
+/* Floating labels */
+.spot-label {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.4;
+  z-index: 5;
+}
+
+.label-cherry {
+  /* sits just inside the cherry circle */
+  top: 34%;
+  right: 3%;
+  text-align: center;
+  color: rgba(200, 60, 90, 0.85);
+  font-size: 10px;
+}
+.label-cherry span {
+  font-weight: 400;
+  font-size: 9px;
+  opacity: 0.8;
+}
+
+body.result-mode .zone               { opacity: 1; }
+body.result-mode .sweet-spot-ellipse { opacity: 1; }
+body.result-mode .cherry-on-top      { opacity: 1; }
+body.result-mode .spot-label         { opacity: 1; }
+
+/* ── Placed Dots ────────────────────────────────────────────── */
+
+/*
+ * .pdot is a 11×11px anchor exactly at the click point.
+ * translate(-50%,-50%) = translate(-5.5px,-5.5px) → circle center == click position.
+ * Label and remove button are absolutely positioned outside the anchor, so
+ * they don't affect the centering calculation.
+ */
+.pdot {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  transform: translate(-50%, -50%);
+  cursor: grab;
+  z-index: 10;
+}
+.pdot.dragging {
+  cursor: grabbing;
+  z-index: 50;
+  transition: none;
+}
+
+.pdot-circle {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.9);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  transition: box-shadow 0.12s;
+}
+.pdot.selected-dot .pdot-circle {
+  box-shadow: 0 0 0 3px rgba(26,115,232,0.5), 0 1px 4px rgba(0,0,0,0.2);
+}
+
+/* Label: positioned to the right of circle by default */
+.pdot-label {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 9.5px;
+  line-height: 1.3;
+  background: rgba(255,255,255,0.93);
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.14);
+  border: 1px solid rgba(0,0,0,0.06);
+  color: #222;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+/* Flip: label goes to the left */
+.pdot.flip .pdot-label {
+  left: auto;
+  right: 14px;
+}
+
+.pdot:hover .pdot-label { opacity: 1; }
+
+/* Remove button */
+.pdot-remove {
+  display: none;
+  position: absolute;
+  top: -18px;
+  left: -18px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #e53935;
+  color: #fff;
+  font-size: 8px;
+  line-height: 15px;
+  text-align: center;
+  cursor: pointer;
+  border: 1.5px solid #fff;
+  z-index: 20;
+}
+.pdot.active .pdot-remove { display: block; }
+.pdot.active .pdot-label { opacity: 1; }
+body.labels-visible .pdot-label { opacity: 1; }
+
+/* ── Modal ──────────────────────────────────────────────────── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.dialog {
+  background: #fff;
+  padding: 24px 28px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+  min-width: 240px;
+}
+.dialog p { margin-bottom: 18px; font-size: 13.5px; }
+.dialog-btns { display: flex; gap: 8px; justify-content: center; }
