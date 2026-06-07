@@ -149,9 +149,6 @@ body.selecting .status-hint { color: #8a6800; font-weight: 500; }
   padding: 0 0 12px;
 }
 
-/* Category group */
-.cat-group { }
-
 /* Category header inside card list */
 .cat-header {
   display: flex;
