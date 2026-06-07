@@ -354,6 +354,36 @@ function toggleResultMode() {
   btn.textContent = resultMode ? '📊 一般模式' : '📊 結果模式';
 }
 
+// ── Export / Import ────────────────────────────────────────────────────────────
+
+function exportJSON() {
+  const data = { version: 1, exportedAt: new Date().toISOString(), placements };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(blob),
+    download: `design-matrix-${new Date().toISOString().slice(0,10)}.json`,
+  });
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importJSON(file) {
+  if (!file) return;
+  file.text().then(text => {
+    try {
+      const { placements: p } = JSON.parse(text);
+      if (!p || typeof p !== 'object') throw new Error();
+      placements = p;
+      save();
+      renderAllDots();
+      renderCardList();
+      updateCount();
+    } catch {
+      alert('無法讀取檔案，請確認是由本工具匯出的 JSON。');
+    }
+  });
+}
+
 // ── Reset ──────────────────────────────────────────────────────────────────────
 
 function resetAll() {
@@ -416,6 +446,15 @@ function bindEvents() {
   document.getElementById('btnCancel').addEventListener('click', deselect);
   document.getElementById('btnExpandAll').addEventListener('click', expandAll);
   document.getElementById('btnCollapseAll').addEventListener('click', collapseAll);
+
+  document.getElementById('btnExport').addEventListener('click', exportJSON);
+  document.getElementById('btnImport').addEventListener('click', () => {
+    document.getElementById('fileImport').click();
+  });
+  document.getElementById('fileImport').addEventListener('change', e => {
+    importJSON(e.target.files[0]);
+    e.target.value = '';
+  });
 
   document.addEventListener('keydown', e => { if (e.key === 'Escape') deselect(); });
 
