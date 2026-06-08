@@ -101,6 +101,37 @@ body.grid-hidden .axis-numbers {
   display: none;
 }
 
+#guideLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.guide-line {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(26,115,232,0.5);
+}
+
+.guide-line-h {
+  height: 1px;
+  border-top: 1px dashed rgba(26,115,232,0.55);
+  background: transparent;
+  transform: translateY(-50%);
+}
+
+.guide-line-v {
+  width: 1px;
+  border-left: 1px dashed rgba(26,115,232,0.55);
+  background: transparent;
+  transform: translateX(-50%);
+}
+
+body.grid-hidden #guideLayer {
+  display: none;
+}
+
 /* Expert ticks */
 .etick {
   position: absolute;

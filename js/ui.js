@@ -85,6 +85,7 @@ function renderAllDots() {
   Object.entries(placements).forEach(([idStr, pos]) => {
     addDot(parseInt(idStr), pos.x, pos.y);
   });
+  updateGuides();
 }
 
 function renderAxisNumbers() {
@@ -160,6 +161,7 @@ function addDot(id, x, y) {
       dot.style.left = nx + '%';
       dot.style.top  = ny + '%';
       if (nx > 68) dot.classList.add('flip'); else dot.classList.remove('flip');
+      if (selectedId === id) updateGuides({ x: nx, y: ny });
     };
 
     const onUp = up => {
@@ -219,6 +221,36 @@ function setActiveDot(id) {
 
 function removeDotEl(id) {
   document.querySelector(`.pdot[data-id="${id}"]`)?.remove();
+  updateGuides();
+}
+
+function updateGuides(posOverride) {
+  const layer = document.getElementById('guideLayer');
+  if (!layer) return;
+
+  layer.innerHTML = '';
+  if (selectedId === null) return;
+
+  const pos = posOverride ?? placements[selectedId];
+  if (!pos) return;
+
+  const x = Math.min(Math.max(pos.x, 1), 99);
+  const y = Math.min(Math.max(pos.y, 1), 99);
+
+  const hLine = document.createElement('div');
+  hLine.className = 'guide-line guide-line-h';
+  hLine.style.left = `${Math.min(x, 50)}%`;
+  hLine.style.top = `${y}%`;
+  hLine.style.width = `${Math.abs(x - 50)}%`;
+
+  const vLine = document.createElement('div');
+  vLine.className = 'guide-line guide-line-v';
+  vLine.style.left = `${x}%`;
+  vLine.style.top = `${Math.min(y, 50)}%`;
+  vLine.style.height = `${Math.abs(y - 50)}%`;
+
+  layer.appendChild(hLine);
+  layer.appendChild(vLine);
 }
 
 function updateCardItem(id) {
@@ -247,6 +279,7 @@ function syncHighlights() {
   document.querySelectorAll('.pdot').forEach(el => {
     el.classList.toggle('selected-dot', parseInt(el.dataset.id) === selectedId);
   });
+  updateGuides();
 }
 
 function catColor(catId) {
