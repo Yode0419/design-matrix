@@ -4,15 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Design Skills Matrix</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/matrix.css">
 </head>
-<body>
+<body class="grid-hidden">
 
   <header class="toolbar">
     <h1 class="site-title">Design Skills Matrix</h1>
     <div class="toolbar-right">
-      <span class="count-badge" id="countBadge">0 / 84 已放置</span>
-      <button class="btn" id="btnLabels">標籤</button>
+      <button class="btn" id="btnGrid">顯示格線</button>
       <button class="btn" id="btnResult">📊 結果模式</button>
       <span class="toolbar-sep"></span>
       <button class="btn" id="btnExport">匯出</button>
@@ -28,13 +32,16 @@
     <!-- ── Left: Card List ── -->
     <aside class="sidebar">
       <div class="sidebar-top">
-        <div class="status-hint" id="statusHint">點擊卡片選取，再點矩陣放置</div>
+        <div class="status-hint" id="statusHint">點擊技能項目選取，再點矩陣放置</div>
         <button class="btn-cancel hidden" id="btnCancel">✕ 取消</button>
       </div>
       <div class="sidebar-actions">
-        <button class="btn-action" id="btnExpandAll">全部展開</button>
-        <span class="action-sep">·</span>
-        <button class="btn-action" id="btnCollapseAll">全部收合</button>
+        <span class="count-badge" id="countBadge">0 / 84 已放置</span>
+        <div class="sidebar-action-group">
+          <button class="btn-action" id="btnExpandAll">全部展開</button>
+          <span class="action-sep">·</span>
+          <button class="btn-action" id="btnCollapseAll">全部收合</button>
+        </div>
       </div>
       <div class="card-list" id="cardList"></div>
     </aside>
@@ -88,6 +95,10 @@
           <div class="axis axis-h"></div>
           <div class="axis axis-v"></div>
 
+          <!-- Numeric scale labels -->
+          <div class="axis-numbers axis-numbers-x" id="axisNumbersX"></div>
+          <div class="axis-numbers axis-numbers-y" id="axisNumbersY"></div>
+
           <!-- Expert level ticks (right half of x-axis) -->
           <div class="etick" style="left:62.5%"></div>
           <div class="etick" style="left:75%"></div>
@@ -121,7 +132,9 @@
     </div>
   </div>
 
-  <script src="data.js"></script>
-  <script src="app.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

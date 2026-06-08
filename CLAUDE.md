@@ -10,15 +10,20 @@ A static, no-build, single-page web app. Open `index.html` directly in a browser
 
 ## Architecture
 
-Three files, no framework, no dependencies:
+Static files, no framework, no dependencies:
 
 | File | Role |
 |------|------|
-| `app.js` | All logic: data, state, rendering, events |
-| `style.css` | All styles: layout, matrix, zones, dot animations |
-| `index.html` | Static shell; all dynamic content is injected by `app.js` |
+| `index.html` | Static shell and persistent matrix markup |
+| `js/data.js` | Category and skill data |
+| `js/storage.js` | localStorage persistence helpers |
+| `js/ui.js` | Sidebar, dot, matrix, and count DOM rendering helpers |
+| `js/app.js` | App state, interaction flow, import/export, reset, and event binding |
+| `css/base.css` | Reset, tokens, base body styles, common buttons |
+| `css/layout.css` | Toolbar, sidebar, content layout, modal |
+| `css/matrix.css` | Matrix, axes, result zones, dots |
 
-### Data layer (`app.js` top)
+### Data layer (`js/data.js`)
 - `CATEGORIES` — 9 category definitions with `id`, `label`, `color`
 - `SKILLS` — 84 skills with `id`, `en`, `zh`, `cat` (references `CATEGORIES.id`)
 
@@ -46,7 +51,6 @@ All DOM is built imperatively via `document.createElement`. There is no virtual 
 |-------|--------|
 | `body.selecting` | Yellow highlight on sidebar-top |
 | `body.result-mode` | Reveals zone overlays, sweet-spot ellipse, cherry circle |
-| `body.labels-visible` | Shows all dot labels permanently |
 | `body.cat-highlight` | Dims all dots except `.cat-match` |
 
 ### Dot label flip

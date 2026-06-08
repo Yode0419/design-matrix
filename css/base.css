@@ -1,0 +1,26 @@
+/* ── Reset & Base ───────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --border: #e0e0e0;
+  --bg: #fafafa;
+  --text: #1a1a1a;
+  --muted: #888;
+  --axis: #d0d0d0;
+  --grid-line: rgba(0, 0, 0, 0.045);
+}
+
+body {
+  font-family: 'Inter', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  background: #fff;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.hidden { display: none !important; }
+
+/* ── Toolbar ────────────────────────────────────────────────── */

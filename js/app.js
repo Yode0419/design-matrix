@@ -1,0 +1,197 @@
+// ── State ──────────────────────────────────────────────────────────────────────
+
+const LS_KEY    = 'dsm_placements_v1';
+const LS_COLLAPSED = 'dsm_collapsed_v1';
+let placements   = {};     // { skillId: { x, y } }  x/y in 0–100 %
+let selectedId   = null;
+let activeDotId  = null;   // dot showing its remove button
+let resultMode   = false;
+let gridVisible  = false;
+let collapsed    = {};     // { catId: true } — persisted
+let highlightCat = null;   // category id being highlighted on matrix
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+
+function init() {
+  loadStorage();
+  renderAxisNumbers();
+  renderCardList();
+  renderAllDots();
+  updateCount();
+  bindEvents();
+}
+
+// ── Interactions ───────────────────────────────────────────────────────────────
+
+function onCardClick(id) {
+  if (selectedId === id) { deselect(); return; }
+  selectSkill(id);
+}
+
+function onDotClick(id) {
+  if (activeDotId === id) {
+    setActiveDot(null);
+    deselect();
+  } else {
+    setActiveDot(id);
+    selectSkill(id);
+  }
+}
+
+function onMatrixClick(e) {
+  if (selectedId === null) { setActiveDot(null); return; }
+
+  if (placements[selectedId] === undefined) {
+    // Unplaced card: click to place
+    const matrix = document.getElementById('matrix');
+    const rect   = matrix.getBoundingClientRect();
+    const x = Math.min(Math.max(((e.clientX - rect.left) / rect.width)  * 100, 1), 99);
+    const y = Math.min(Math.max(((e.clientY - rect.top)  / rect.height) * 100, 1), 99);
+    place(selectedId, x, y);
+  }
+
+  deselect();
+}
+
+function selectSkill(id) {
+  selectedId = id;
+  const skill = SKILLS.find(s => s.id === id);
+  document.body.classList.add('selecting');
+  const isPlaced = placements[id] !== undefined;
+  document.getElementById('statusHint').textContent = isPlaced
+    ? `已選取「${skill.en}」，拖曳圓點移動位置`
+    : `已選取「${skill.en}」，點矩陣放置`;
+  document.getElementById('btnCancel').classList.remove('hidden');
+  syncHighlights();
+}
+
+function deselect() {
+  selectedId = null;
+  setActiveDot(null);
+  document.body.classList.remove('selecting');
+  document.getElementById('statusHint').textContent =
+    '點擊技能項目選取，再點矩陣放置';
+  document.getElementById('btnCancel').classList.add('hidden');
+  syncHighlights();
+}
+
+function place(id, x, y) {
+  placements[id] = { x: round2(x), y: round2(y) };
+  save();
+  removeDotEl(id);
+  addDot(id, x, y);
+  updateCardItem(id);
+  updateCount();
+}
+
+function removePlacement(id) {
+  delete placements[id];
+  save();
+  removeDotEl(id);
+  if (selectedId === id) deselect();
+  updateCardItem(id);
+  updateCount();
+}
+
+// Update a single card item without re-rendering the full list
+// ── Result Mode ────────────────────────────────────────────────────────────────
+
+function toggleResultMode() {
+  resultMode = !resultMode;
+  document.body.classList.toggle('result-mode', resultMode);
+  const btn = document.getElementById('btnResult');
+  btn.classList.toggle('active', resultMode);
+  btn.textContent = resultMode ? '📊 一般模式' : '📊 結果模式';
+}
+
+function toggleGrid() {
+  gridVisible = !gridVisible;
+  document.body.classList.toggle('grid-hidden', !gridVisible);
+  document.getElementById('btnGrid').textContent = gridVisible ? '隱藏格線' : '顯示格線';
+}
+
+// ── Export / Import ────────────────────────────────────────────────────────────
+
+function exportJSON() {
+  const data = { version: 1, exportedAt: new Date().toISOString(), placements };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(blob),
+    download: `design-matrix-${new Date().toISOString().slice(0,10)}.json`,
+  });
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importJSON(file) {
+  if (!file) return;
+  file.text().then(text => {
+    try {
+      const { placements: p } = JSON.parse(text);
+      if (!p || typeof p !== 'object') throw new Error();
+      placements = p;
+      save();
+      renderAllDots();
+      renderCardList();
+      updateCount();
+    } catch {
+      alert('無法讀取檔案，請確認是由本工具匯出的 JSON。');
+    }
+  });
+}
+
+// ── Reset ──────────────────────────────────────────────────────────────────────
+
+function resetAll() {
+  placements = {};
+  save();
+  selectedId = null;
+  document.body.classList.remove('selecting');
+  document.getElementById('dotsLayer').innerHTML = '';
+  renderCardList();
+  updateCount();
+  deselect();
+}
+
+// ── Events ─────────────────────────────────────────────────────────────────────
+
+function bindEvents() {
+  document.getElementById('matrix').addEventListener('click', onMatrixClick);
+  document.getElementById('btnGrid').addEventListener('click', toggleGrid);
+  document.getElementById('btnResult').addEventListener('click', toggleResultMode);
+
+  document.getElementById('btnReset').addEventListener('click', () => {
+    document.getElementById('overlay').classList.remove('hidden');
+  });
+  document.getElementById('btnConfirmReset').addEventListener('click', () => {
+    resetAll();
+    document.getElementById('overlay').classList.add('hidden');
+  });
+  document.getElementById('btnCancelReset').addEventListener('click', () => {
+    document.getElementById('overlay').classList.add('hidden');
+  });
+
+  document.getElementById('btnCancel').addEventListener('click', deselect);
+  document.getElementById('btnExpandAll').addEventListener('click', expandAll);
+  document.getElementById('btnCollapseAll').addEventListener('click', collapseAll);
+
+  document.getElementById('btnExport').addEventListener('click', exportJSON);
+  document.getElementById('btnImport').addEventListener('click', () => {
+    document.getElementById('fileImport').click();
+  });
+  document.getElementById('fileImport').addEventListener('change', e => {
+    importJSON(e.target.files[0]);
+    e.target.value = '';
+  });
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') deselect(); });
+
+  document.getElementById('overlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget)
+      document.getElementById('overlay').classList.add('hidden');
+  });
+}
+
+// ── Start ──────────────────────────────────────────────────────────────────────
+
+init();
