@@ -136,11 +136,21 @@ function renderAxisNumbers() {
 }
 
 function classifyZone(x, y) {
-  if (x >= 25 && x < 40 && y < 50) return 'danger';
+  // danger: ellipse x22~40, y0~45 → cx=31, cy=22.5, rx=9, ry=22.5
+  if (((x - 31) / 9) ** 2 + ((y - 22.5) / 22.5) ** 2 <= 1) return 'danger';
   if (x < 50 && y < 50) return 'tl';
   if (x >= 50 && y < 50) return 'tr';
   if (x < 50) return 'bl';
   return 'br';
+}
+
+// Ellipse equation: ((x-cx)/rx)^2 + ((y-cy)/ry)^2 <= 1
+function isInSweetSpot(x, y) {
+  // sweet-spot: x29~76, y5~56 → cx=52.5, cy=30.5, rx=23.5, ry=25.5
+  const inEllipse = ((x - 52.5) / 23.5) ** 2 + ((y - 30.5) / 25.5) ** 2 <= 1;
+  // cherry: x68~82, y0~25 → cx=75, cy=12.5, rx=7, ry=12.5
+  const inCherry  = ((x - 75) / 7)    ** 2 + ((y - 12.5) / 12.5) ** 2 <= 1;
+  return inEllipse || inCherry;
 }
 
 function addDot(id, x, y) {
@@ -153,7 +163,8 @@ function addDot(id, x, y) {
   dot.className = 'pdot' + (flip ? ' flip' : '') + (selectedId === id ? ' selected-dot' : '');
   dot.dataset.id   = id;
   dot.dataset.cat  = skill.cat;
-  dot.dataset.zone = classifyZone(x, y);
+  dot.dataset.zone  = classifyZone(x, y);
+  dot.dataset.sweet = isInSweetSpot(x, y) ? '1' : '0';
   dot.style.left   = x + '%';
   dot.style.top    = y + '%';
   dot.title = `${skill.en} / ${skill.zh}`;

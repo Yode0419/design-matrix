@@ -347,6 +347,80 @@ body.cat-highlight .pdot.cat-match { opacity: 1; }
 .card-item:hover .card-delete-btn { opacity: 0.55; }
 .card-delete-btn:hover { opacity: 1 !important; background: #fef0ee; color: #c0392b; }
 
+/* ── Axis Help Cards ────────────────────────────────────────── */
+
+.axis-help-card {
+  position: absolute;
+  width: 200px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 8px;
+  padding: 12px 14px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+  z-index: 180;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s;
+}
+
+.axis-help-card--wide {
+  width: 340px;
+}
+
+body.axis-help .axis-help-card {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.axis-help-header {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 7px;
+}
+
+.axis-help-desc {
+  font-size: 11px;
+  color: #555;
+  line-height: 1.65;
+  margin: 0 0 10px;
+}
+
+.axis-level-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.axis-level {
+  padding: 7px 9px;
+  border-radius: 5px;
+  background: #f8f8f8;
+  border-left: 3px solid #ddd;
+}
+
+.axis-level[data-level="1"] { border-left-color: #f5c35a; background: rgba(245,195,90,0.08); }
+.axis-level[data-level="2"] { border-left-color: #64b5e8; background: rgba(100,181,232,0.08); }
+.axis-level[data-level="3"] { border-left-color: #4db6ac; background: rgba(77,182,172,0.08); }
+.axis-level[data-level="4"] { border-left-color: #f48fb1; background: rgba(244,143,177,0.08); }
+
+.axis-level-name {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 3px;
+}
+
+.axis-level-desc {
+  font-size: 10px;
+  color: #666;
+  line-height: 1.5;
+  margin: 0;
+}
+
 /* ── Zone Filter Bar ────────────────────────────────────────── */
 
 .zone-bar {
@@ -394,15 +468,63 @@ body.result-mode .zone-bar {
   font-weight: 600;
 }
 
-/* Per-zone active colours */
-.zone-btn[data-zone="tl"].active    { background: #00897b; border-color: #00897b; color: #fff; }
-.zone-btn[data-zone="danger"].active { background: #f97316; border-color: #f97316; color: #fff; }
-.zone-btn[data-zone="tr"].active    { background: #d97706; border-color: #d97706; color: #fff; }
-.zone-btn[data-zone="bl"].active    { background: #e53935; border-color: #e53935; color: #fff; }
-.zone-btn[data-zone="br"].active    { background: #3c5dd4; border-color: #3c5dd4; color: #fff; }
+/* Per-zone active colours — light tint + coloured border, no solid fill */
+.zone-btn.active { font-weight: 600; }
 
-.zone-btn.active .zone-count {
-  background: rgba(255,255,255,0.28);
+.zone-btn[data-zone="tl"].active     { background: rgba(0,150,136,0.1);  border-color: #009688; color: #00695c; }
+.zone-btn[data-zone="tr"].active     { background: rgba(255,152,0,0.1);  border-color: #f59e0b; color: #92400e; }
+.zone-btn[data-zone="bl"].active     { background: rgba(229,57,53,0.1);  border-color: #e53935; color: #b71c1c; }
+.zone-btn[data-zone="br"].active     { background: rgba(60,93,212,0.1);  border-color: #3c5dd4; color: #1e3a8a; }
+.zone-btn[data-zone="danger"].active { background: rgba(249,115,22,0.1); border-color: #f97316; color: #c2410c; }
+.zone-btn[data-zone="sweet"].active  { background: rgba(80,170,200,0.1); border-color: #50aac8; color: #0e6e8c; }
+
+.zone-btn.active .zone-count { background: rgba(0,0,0,0.08); }
+
+/* ── Zone Info Card ─────────────────────────────────────────── */
+
+.zone-info-card {
+  position: absolute;
+  width: 210px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 8px;
+  padding: 12px 14px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s;
+}
+
+.zone-info-card.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Position is set dynamically by JS (showZoneInfoCard → positionZoneCard) */
+
+.zone-info-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 7px;
+}
+
+.zone-info-quote {
+  font-size: 11.5px;
+  font-weight: 600;
+  font-style: italic;
+  color: #222;
+  line-height: 1.45;
+  margin-bottom: 9px;
+}
+
+.zone-info-desc {
+  font-size: 11px;
+  color: #555;
+  line-height: 1.65;
 }
 
 /* ── Modal ──────────────────────────────────────────────────── */

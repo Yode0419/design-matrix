@@ -4,6 +4,7 @@
   flex-direction: column;
   padding: 8px 14px 40px 10px;
   min-width: 0;
+  position: relative;
 }
 
 .matrix-outer {
@@ -44,7 +45,7 @@
     repeating-linear-gradient(to bottom, transparent 0, transparent calc(2.5% - 1px), var(--grid-line) calc(2.5% - 1px), var(--grid-line) 2.5%),
     var(--bg);
   cursor: crosshair;
-  overflow: visible;
+  overflow: hidden;
 }
 
 body.grid-hidden .matrix {
@@ -186,66 +187,33 @@ body.grid-hidden #guideLayer {
   border-left: 1px dashed rgba(60,93,212,0.25);
   border-top: 1px dashed rgba(60,93,212,0.18); }
 
-/* Danger Zone: right portion of TL, adjacent to vertical center axis */
+/* Danger Zone: ellipse x22~40, y0~45 */
 .zone-danger {
   top: 0%;
-  left: 25%;
-  width: 15%;
-  height: 50%;
+  left: 22%;
+  width: 18%;
+  height: 45%;
   background: rgba(255, 152, 0, 0.08);
   border: 1.5px dashed rgba(255, 152, 0, 0.6);
-  border-radius: 6px;
-  justify-content: flex-start;
-  padding-top: 8px;
+  border-radius: 50%;
 }
 
-/* Zone text */
-.zone-quote {
-  font-size: 10.5px;
-  font-weight: 600;
-  font-style: italic;
-  text-align: center;
-  line-height: 1.4;
-  color: #333;
-  opacity: 0.72;
-  padding: 0 4px;
-}
 
-.zone-danger .zone-quote {
-  font-style: normal;
-  font-size: 10px;
-  opacity: 0.85;
-}
-
-.zone-desc {
-  font-size: 9px;
-  line-height: 1.55;
-  color: #444;
-  text-align: center;
-  padding: 5px 4px 0;
-  opacity: 0;
-  transition: opacity 0.18s;
-  max-width: 95%;
-}
-
-/* In result mode: zones appear and become hoverable */
+/* In result mode: zones appear */
 body.result-mode .zone {
   opacity: 1;
-  pointer-events: auto;
+  pointer-events: none;
   cursor: default;
 }
-
-body.result-mode .zone:hover { z-index: 8; }
-body.result-mode .zone:hover .zone-desc { opacity: 0.88; }
 
 /* ── Sweet Spot Ellipse ──────────────────────────────────────── */
 /* Large oval covering most of matrix — matches Figma "sweet spot" area */
 .sweet-spot-ellipse {
   position: absolute;
-  left: 25%;
-  top: 0%;
-  width: 55%;
-  height: 55%;
+  left: 29%;
+  top: 5%;
+  width: 47%;
+  height: 51%;
   border-radius: 50%;
   background: rgba(100, 195, 220, 0.07);
   border: 1.5px solid rgba(80, 170, 200, 0.35);
@@ -255,13 +223,13 @@ body.result-mode .zone:hover .zone-desc { opacity: 0.88; }
   z-index: 3;
 }
 
-/* Cherry on top — smaller pink circle, upper-right Expert corner */
+/* Cherry on top — smaller pink ellipse, upper-right Expert corner */
 .cherry-on-top {
   position: absolute;
-  right: 20%;
+  left: 68%;
   top: 0%;
-  width: 16%;
-  height: 22%;
+  width: 14%;
+  height: 25%;
   border-radius: 50%;
   background: rgba(240, 90, 120, 0.12);
   border: 1.5px solid rgba(240, 90, 120, 0.4);
@@ -284,9 +252,14 @@ body.result-mode .zone:hover .zone-desc { opacity: 0.88; }
 }
 
 .label-cherry {
-  /* sits just inside the cherry circle */
-  top: 34%;
-  right: 3%;
+  left: 68%;
+  top: 0%;
+  width: 14%;
+  height: 25%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   color: rgba(200, 60, 90, 0.85);
   font-size: 10px;
@@ -326,10 +299,11 @@ body.zone-focus-tr .pdot[data-zone="tr"]         { opacity: 1; }
 body.zone-focus-bl .pdot[data-zone="bl"]         { opacity: 1; }
 body.zone-focus-br .pdot[data-zone="br"]         { opacity: 1; }
 
-/* Sweet-spot shapes stay visible when TR (sweet spot) is focused */
-body.zone-focus-tr .sweet-spot-ellipse,
-body.zone-focus-tr .cherry-on-top,
-body.zone-focus-tr .spot-label { opacity: 1; }
+/* Sweet spot button: show ellipse + cherry only (no zone overlay) */
+body.zone-focus-sweet .sweet-spot-ellipse { opacity: 1; }
+body.zone-focus-sweet .cherry-on-top      { opacity: 1; }
+body.zone-focus-sweet .spot-label         { opacity: 1; }
+body.zone-focus-sweet .pdot[data-sweet="1"] { opacity: 1; }
 
 /* ── Placed Dots ────────────────────────────────────────────── */
 

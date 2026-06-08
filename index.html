@@ -18,7 +18,8 @@
     <header class="toolbar">
       <h1 class="site-title">Design Skills Matrix</h1>
       <div class="toolbar-right">
-        <button class="btn" id="btnGrid">顯示格線</button>
+        <button class="btn" id="btnHelp">說明</button>
+        <button class="btn" id="btnGrid">格線</button>
         <span class="toolbar-sep"></span>
         <button class="btn" id="btnExport">匯出</button>
         <button class="btn" id="btnImport">匯入</button>
@@ -70,13 +71,49 @@
 
       <!-- ── Right: Matrix ── -->
       <section class="matrix-panel">
+        <!-- Axis help cards (toggle via 說明 button) -->
+        <div class="axis-help-card" id="axisHelpY">
+          <div class="axis-help-header">WANT TO DO MORE · 縱軸</div>
+          <p class="axis-help-desc">縱軸代表你對這項技能的「熱情程度」。請以理想工作環境為標準評估——你有多想在未來持續投入這個領域，不要受到現實職場的政治或環境因素影響。</p>
+        </div>
+        <div class="axis-help-card axis-help-card--wide" id="axisHelpX">
+          <div class="axis-help-header">EXPERT AT THIS · 橫軸</div>
+          <p class="axis-help-desc">橫軸右半部是一段連續的專業程度量尺，從中線往右分為四個區段：</p>
+          <div class="axis-level-grid">
+            <div class="axis-level" data-level="1">
+              <span class="axis-level-name">普通</span>
+              <p class="axis-level-desc">你曾成功執行過幾次，可能有人督導或協助。</p>
+            </div>
+            <div class="axis-level" data-level="2">
+              <span class="axis-level-name">熟練</span>
+              <p class="axis-level-desc">至少成功執行 7–8 次，幾乎不需要督導或協助。</p>
+            </div>
+            <div class="axis-level" data-level="3">
+              <span class="axis-level-name">精通</span>
+              <p class="axis-level-desc">在專業環境中執行過至少 12 次，且能清楚說明如何達成成果。</p>
+            </div>
+            <div class="axis-level" data-level="4">
+              <span class="axis-level-name">專家</span>
+              <p class="axis-level-desc">至少成功執行 20 次，並曾指導他人學習這項技能。</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Zone filter bar (result mode only) -->
+        <!-- Zone info card (appears when a zone is focused) -->
+        <div class="zone-info-card" id="zoneInfoCard">
+          <div class="zone-info-label" id="zoneInfoLabel"></div>
+          <p class="zone-info-quote" id="zoneInfoQuote"></p>
+          <p class="zone-info-desc" id="zoneInfoDesc"></p>
+        </div>
+
         <div class="zone-bar" id="zoneBar">
-          <button class="zone-btn" data-zone="tl">學習目標 <span class="zone-count" id="zcount-tl">0</span></button>
-          <button class="zone-btn" data-zone="danger">⚠️ 危險地帶 <span class="zone-count" id="zcount-danger">0</span></button>
-          <button class="zone-btn" data-zone="tr">⭐ 甜蜜點 <span class="zone-count" id="zcount-tr">0</span></button>
-          <button class="zone-btn" data-zone="bl">不感興趣 <span class="zone-count" id="zcount-bl">0</span></button>
-          <button class="zone-btn" data-zone="br">可支援 <span class="zone-count" id="zcount-br">0</span></button>
+          <button class="zone-btn" data-zone="tr">Q1: 再次確認 <span class="zone-count" id="zcount-tr">0</span></button>
+          <button class="zone-btn" data-zone="tl">Q2: 學習目標 <span class="zone-count" id="zcount-tl">0</span></button>
+          <button class="zone-btn" data-zone="bl">Q3: 不感興趣 <span class="zone-count" id="zcount-bl">0</span></button>
+          <button class="zone-btn" data-zone="br">Q4: 可支援 <span class="zone-count" id="zcount-br">0</span></button>
+          <button class="zone-btn" data-zone="danger">危險地帶 <span class="zone-count" id="zcount-danger">0</span></button>
+          <button class="zone-btn" data-zone="sweet">甜蜜點 <span class="zone-count" id="zcount-sweet">0</span></button>
         </div>
         <div class="matrix-outer">
           <div class="axis-label label-top">WANT TO DO MORE</div>
@@ -86,48 +123,19 @@
             <!-- Result mode zone overlays -->
 
             <!-- TL: Still Learning + Want More -->
-            <div class="zone zone-tl">
-              <p class="zone-quote">
-                "I like this, but I don't know enough yet."
-              </p>
-              <p class="zone-desc">
-                這裡的技能可以優先列為學習目標。在面試中，你能展現對這些領域的既有認識與學習熱忱，也可以用來評估職缺是否符合你的成長方向。
-              </p>
-            </div>
+            <div class="zone zone-tl"></div>
 
             <!-- TL sub-zone: Danger Zone (near vertical center) -->
-            <div class="zone zone-danger">
-              <p class="zone-quote">⚠️ Watch out for your "Danger Zone"</p>
-              <p class="zone-desc">
-                這些技能雖然令人興奮，但可能讓你分心、偏離日常工作重點。請先制定策略，再有計畫地投入學習，而不是盲目追求。
-              </p>
-            </div>
+            <div class="zone zone-danger"></div>
 
             <!-- TR: Expert + Want More = Sweet Spot -->
-            <div class="zone zone-tr">
-              <p class="zone-quote">⭐ 甜蜜點 Sweet Spot</p>
-              <p class="zone-desc">
-                請再仔細確認你對這些技能的實際專業程度。許多設計師對自己的技能過度自信——對照各子象限的標準，確認放置位置是否真的準確。
-              </p>
-            </div>
+            <div class="zone zone-tr"></div>
 
             <!-- BL: Still Learning + Want Less -->
-            <div class="zone zone-bl">
-              <p class="zone-quote">"I don't like this and I don't care."</p>
-              <p class="zone-desc">
-                這些是你不享受、也不想繼續發展的技能。看職位說明時留意這些項目——確保你是在發揮強項，而不是用弱項去滿足職位要求。
-              </p>
-            </div>
+            <div class="zone zone-bl"></div>
 
             <!-- BR: Expert + Want Less -->
-            <div class="zone zone-br">
-              <p class="zone-quote">
-                "I'm good at this and I will do it if I have to."
-              </p>
-              <p class="zone-desc">
-                這些技能你能做、但沒有熱情。必要時可以支援團隊，在面試中提及這些技能也可成為差異化的競爭亮點。
-              </p>
-            </div>
+            <div class="zone zone-br"></div>
 
             <!-- Sweet spot ellipse (Expert + Want More area) -->
             <div class="sweet-spot-ellipse"></div>

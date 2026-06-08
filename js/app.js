@@ -1,3 +1,38 @@
+// ── Zone descriptions ──────────────────────────────────────────────────────────
+
+const ZONE_INFO = {
+  tl: {
+    label: 'Q2: 學習目標',
+    quote: '"I like this, but I don\'t know enough yet."',
+    desc: '這裡的技能可以優先列為學習目標。在面試中，你能展現對這些領域的既有認識與學習熱忱；比較多份職缺時，也可作為評估工作符合程度的參考依據。',
+  },
+  tr: {
+    label: 'Q1: 再次確認',
+    quote: '"Double Check Your Expertise"',
+    desc: '仔細重新審視你放到右上象限的技能。許多職涯初期的設計師對自身技能在真實職場中的水準缺乏認知，容易過度自信。請對照各子象限的標準，確認放置位置是否真的準確。',
+  },
+  bl: {
+    label: 'Q3: 不感興趣',
+    quote: '"I don\'t like this and I don\'t care."',
+    desc: '這些是你不享受、也不想繼續發展的技能。在職缺說明和面試中留意這些項目，確保你在發揮強項。若一份職缺列出超過兩項這類技能作為職責，建議避免申請。',
+  },
+  br: {
+    label: 'Q4: 可支援',
+    quote: '"I\'m good at this and I will do it if I have to."',
+    desc: '這些技能你能做、但沒有熱情。必要時可以支援團隊。在求職時提及這些技能，可以作為與其他候選人產生差異化的競爭亮點。',
+  },
+  danger: {
+    label: '危險地帶',
+    quote: 'Watch out for your "Danger Zone"',
+    desc: '這些技能令你興奮，足以讓你分心於日常工作職責，甚至阻礙核心技能的精進。若想投入學習，請先制定清楚的策略，再有計畫地執行，而不是盲目追求有趣的事物。',
+  },
+  sweet: {
+    label: '甜蜜點',
+    quote: '"I\'m great at these things, and I would almost do them for free."',
+    desc: '落在甜蜜點的技能是你最重要的核心——你擅長且熱愛持續深耕。在履歷、作品集和面試中以這些技能為核心主動呈現，找到令你興奮又有挑戰性的工作。Cherry on Top 圓圈內是你的絕對強項：你享受做這些事、能幫助他人學習，甚至可以在你熱愛的專案中志願貢獻！',
+  },
+};
+
 // ── State ──────────────────────────────────────────────────────────────────────
 
 const LS_KEY    = 'dsm_placements_v1';
@@ -10,6 +45,7 @@ let activeZone   = null;   // zone currently highlighted ('tl'|'danger'|'tr'|'bl
 let gridVisible  = false;
 let collapsed    = {};     // { catId: true } — persisted
 let highlightCat = null;   // category id being highlighted on matrix
+let axisHelpVisible = false;
 
 // ── Init ───────────────────────────────────────────────────────────────────────
 
@@ -109,6 +145,7 @@ function removePlacement(id) {
 function toggleResultMode() {
   resultMode = !resultMode;
   if (!resultMode && activeZone) clearZoneFocus();
+  if (!resultMode) hideZoneInfoCard();
   document.body.classList.toggle('result-mode', resultMode);
   const btn = document.getElementById('btnResult');
   btn.classList.toggle('active', resultMode);
@@ -123,6 +160,7 @@ function toggleZoneFocus(zone) {
   document.querySelectorAll('.zone-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.zone === zone);
   });
+  showZoneInfoCard(zone);
 }
 
 function clearZoneFocus() {
@@ -130,6 +168,59 @@ function clearZoneFocus() {
   document.body.classList.remove('zone-focused');
   activeZone = null;
   document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('active'));
+  hideZoneInfoCard();
+}
+
+function positionZoneCard(zone, card) {
+  const panel = document.querySelector('.matrix-panel');
+  const zoneEl = zone === 'sweet'
+    ? document.querySelector('.sweet-spot-ellipse')
+    : document.querySelector('.zone-' + zone);
+  if (!zoneEl || !panel) return;
+
+  const panelRect = panel.getBoundingClientRect();
+  const zoneRect  = zoneEl.getBoundingClientRect();
+  const GAP = 12;
+
+  card.style.top    = '';
+  card.style.bottom = '';
+  card.style.left   = '';
+  card.style.right  = '';
+
+  const isTop = ['tl', 'danger', 'tr', 'sweet'].includes(zone);
+  if (isTop) {
+    card.style.top = (zoneRect.bottom - panelRect.top + GAP) + 'px';
+  } else {
+    card.style.bottom = (panelRect.bottom - zoneRect.top + GAP) + 'px';
+  }
+
+  const isRight = ['tr', 'br', 'sweet'].includes(zone);
+  if (isRight) {
+    card.style.right = Math.max(14, panelRect.right - zoneRect.right) + 'px';
+  } else {
+    card.style.left = Math.max(10, zoneRect.left - panelRect.left) + 'px';
+  }
+}
+
+function showZoneInfoCard(zone) {
+  const info = ZONE_INFO[zone];
+  if (!info) return;
+  const card = document.getElementById('zoneInfoCard');
+  card.classList.remove('visible');
+  requestAnimationFrame(() => {
+    document.getElementById('zoneInfoLabel').textContent = info.label;
+    document.getElementById('zoneInfoQuote').textContent = info.quote;
+    document.getElementById('zoneInfoDesc').textContent = info.desc;
+    card.dataset.zone = zone;
+    positionZoneCard(zone, card);
+    requestAnimationFrame(() => card.classList.add('visible'));
+  });
+}
+
+function hideZoneInfoCard() {
+  const card = document.getElementById('zoneInfoCard');
+  card.classList.remove('visible');
+  delete card.dataset.zone;
 }
 
 function updateZoneCounts() {
@@ -137,16 +228,49 @@ function updateZoneCounts() {
   Object.values(placements).forEach(({ x, y }) => {
     counts[classifyZone(x, y)]++;
   });
-  Object.keys(counts).forEach(z => {
-    const el = document.getElementById(`zcount-${z}`);
-    if (el) el.textContent = counts[z];
-  });
+  const sweetCount = Object.values(placements).filter(({ x, y }) => isInSweetSpot(x, y)).length;
+  document.getElementById('zcount-danger').textContent = counts.danger;
+  document.getElementById('zcount-sweet').textContent  = sweetCount;
+  // Q2 focus highlights both tl and danger dots, so count both
+  document.getElementById('zcount-tl').textContent = counts.tl + counts.danger;
+  document.getElementById('zcount-tr').textContent = counts.tr;
+  document.getElementById('zcount-bl').textContent = counts.bl;
+  document.getElementById('zcount-br').textContent = counts.br;
+}
+
+function toggleAxisHelp() {
+  axisHelpVisible = !axisHelpVisible;
+  document.body.classList.toggle('axis-help', axisHelpVisible);
+  document.getElementById('btnHelp').classList.toggle('active', axisHelpVisible);
+  if (axisHelpVisible) positionAxisHelpCards();
+}
+
+function positionAxisHelpCards() {
+  const panel = document.querySelector('.matrix-panel');
+  const matrix = document.getElementById('matrix');
+  if (!panel || !matrix) return;
+
+  const panelRect  = panel.getBoundingClientRect();
+  const matrixRect = matrix.getBoundingClientRect();
+  const GAP = 10;
+
+  const cardY = document.getElementById('axisHelpY');
+  cardY.style.top    = (matrixRect.top  - panelRect.top  + GAP) + 'px';
+  cardY.style.left   = (matrixRect.left - panelRect.left + GAP) + 'px';
+  cardY.style.bottom = '';
+  cardY.style.right  = '';
+
+  const cardX = document.getElementById('axisHelpX');
+  cardX.style.bottom = (panelRect.bottom - matrixRect.bottom + GAP + 4) + 'px';
+  cardX.style.right  = (panelRect.right  - matrixRect.right  + GAP) + 'px';
+  cardX.style.top    = '';
+  cardX.style.left   = '';
 }
 
 function toggleGrid() {
   gridVisible = !gridVisible;
   document.body.classList.toggle('grid-hidden', !gridVisible);
-  document.getElementById('btnGrid').textContent = gridVisible ? '隱藏格線' : '顯示格線';
+  document.getElementById('btnGrid').classList.toggle('active', gridVisible);
 }
 
 // ── Custom Skills ──────────────────────────────────────────────────────────────
@@ -241,6 +365,7 @@ function resetAll() {
 
 function bindEvents() {
   document.getElementById('matrix').addEventListener('click', onMatrixClick);
+  document.getElementById('btnHelp').addEventListener('click', toggleAxisHelp);
   document.getElementById('btnGrid').addEventListener('click', toggleGrid);
   document.getElementById('btnResult').addEventListener('click', toggleResultMode);
 
