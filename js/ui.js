@@ -370,7 +370,7 @@ function truncate(str, len) {
   return str.length > len ? str.slice(0, len) + '…' : str;
 }
 
-function round2(n) { return Math.round(n * 100) / 100; }
+function round1(n) { return Math.round(n * 10) / 10; }
 
 function esc(str) {
   return str

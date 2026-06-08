@@ -10,6 +10,10 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20,400,0,0"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/layout.css" />
     <link rel="stylesheet" href="css/matrix.css" />
@@ -18,15 +22,17 @@
     <header class="toolbar">
       <h1 class="site-title">Design Skills Matrix</h1>
       <div class="toolbar-right">
-        <button class="btn" id="btnHelp">說明</button>
-        <button class="btn" id="btnGrid">格線</button>
+        <button class="btn" id="btnHelp"><span class="material-symbols-rounded">info</span>說明</button>
+        <button class="btn" id="btnGrid"><span class="material-symbols-rounded">grid_on</span>格線</button>
         <span class="toolbar-sep"></span>
-        <button class="btn" id="btnExport">匯出</button>
-        <button class="btn" id="btnImport">匯入</button>
+        <button class="btn" id="btnShare"><span class="material-symbols-rounded">ios_share</span>分享</button>
+        <button class="btn" id="btnExport"><span class="material-symbols-rounded">download</span>匯出</button>
+        <button class="btn" id="btnImport"><span class="material-symbols-rounded">upload</span>匯入</button>
         <input type="file" id="fileImport" accept=".json" class="hidden" />
         <span class="toolbar-sep"></span>
-        <button class="btn btn-danger" id="btnReset">重製</button>
-        <button class="btn btn-cta" id="btnResult">📊 結果模式</button>
+        <button class="btn btn-danger" id="btnReset"><span class="material-symbols-rounded">delete_sweep</span>清除</button>
+        <button class="btn btn-cta mode-toggle hidden" id="btnEdit"><span class="material-symbols-rounded">close</span>關閉結果</button>
+        <button class="btn btn-cta mode-toggle" id="btnResult"><span class="material-symbols-rounded">analytics</span>查看結果</button>
       </div>
     </header>
 
@@ -37,20 +43,32 @@
           <div class="status-hint" id="statusHint">
             點擊技能項目選取，再點矩陣放置
           </div>
-          <button class="btn-cancel hidden" id="btnCancel">✕ 取消</button>
+          <button class="btn-cancel hidden" id="btnCancel"><span class="material-symbols-rounded">close</span>取消</button>
         </div>
         <div class="sidebar-actions">
           <span class="count-badge" id="countBadge">0 / 84 已放置</span>
           <div class="sidebar-action-group">
-            <button class="btn-action" id="btnExpandAll">全部展開</button>
+            <button class="btn-action" id="btnExpandAll"><span class="material-symbols-rounded">unfold_more</span>全部展開</button>
             <span class="action-sep">·</span>
-            <button class="btn-action" id="btnCollapseAll">全部收合</button>
+            <button class="btn-action" id="btnCollapseAll"><span class="material-symbols-rounded">unfold_less</span>全部收合</button>
+          </div>
+        </div>
+        <!-- Help overlay (visible when 說明 is active) -->
+        <div class="sidebar-help-overlay" id="sidebarHelp">
+          <div class="sidebar-help-inner">
+            <div class="sidebar-help-title">如何使用</div>
+            <ol class="sidebar-help-steps">
+              <li><span class="step-icon">①</span><span>從左側清單點擊一項技能</span></li>
+              <li><span class="step-icon">②</span><span>在右側矩陣上點擊想放置的位置</span></li>
+              <li><span class="step-icon">③</span><span>重複以上步驟，完成後點擊右上角「結果模式」查看分析</span></li>
+            </ol>
+            <p class="sidebar-help-tip">💡 已放置的點可以拖曳移動，或點擊點後按刪除鍵移除；也可在清單底部新增自訂技能</p>
           </div>
         </div>
         <div class="card-list" id="cardList"></div>
         <div class="add-skill-row">
           <button class="btn-action btn-add-skill" id="btnAddSkill">
-            ＋ 新增自訂技能
+            <span class="material-symbols-rounded">add</span>新增自訂技能
           </button>
         </div>
         <div id="addSkillForm" class="add-skill-form hidden">
@@ -63,8 +81,8 @@
           />
           <select id="addSkillCat"></select>
           <div class="add-skill-actions">
-            <button class="btn" id="btnConfirmAdd">新增</button>
-            <button class="btn" id="btnCancelAdd">取消</button>
+            <button class="btn" id="btnConfirmAdd"><span class="material-symbols-rounded">check</span>新增</button>
+            <button class="btn" id="btnCancelAdd"><span class="material-symbols-rounded">close</span>取消</button>
           </div>
         </div>
       </aside>
@@ -180,16 +198,35 @@
           <div class="axis-label label-right"><span>EXPERT AT THIS</span></div>
           <div class="axis-label label-bottom">WANT TO DO LESS</div>
         </div>
+        <p class="matrix-credit">原始框架由 <a href="https://www.figma.com/@maigen" target="_blank" rel="noopener noreferrer">Maigen Thomas</a> 設計 · <a href="https://www.figma.com/community/file/1142203484282738794/design-skills-matrix" target="_blank" rel="noopener noreferrer">Design Skills Matrix on Figma Community</a></p>
       </section>
     </main>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Share modal -->
+    <div class="overlay hidden" id="shareOverlay">
+      <div class="dialog dialog--share">
+        <p class="dialog-title">分享矩陣</p>
+        <p class="dialog-sub">複製以下連結，對方開啟後即可還原你的矩陣狀態。</p>
+        <div class="share-url-row">
+          <input type="text" id="shareUrlInput" readonly />
+          <button class="btn btn-cta" id="btnCopyUrl"><span class="material-symbols-rounded">content_copy</span>複製</button>
+        </div>
+        <div class="dialog-btns">
+          <button class="btn" id="btnCloseShare"><span class="material-symbols-rounded">close</span>關閉</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Reset confirm -->
     <div class="overlay hidden" id="overlay">
       <div class="dialog">
         <p>確定要清除所有放置紀錄？</p>
         <div class="dialog-btns">
-          <button class="btn btn-danger" id="btnConfirmReset">確定清除</button>
-          <button class="btn" id="btnCancelReset">取消</button>
+          <button class="btn btn-danger" id="btnConfirmReset"><span class="material-symbols-rounded">delete_sweep</span>確定清除</button>
+          <button class="btn" id="btnCancelReset"><span class="material-symbols-rounded">close</span>取消</button>
         </div>
       </div>
     </div>

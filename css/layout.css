@@ -23,7 +23,10 @@
 }
 
 .btn {
-  padding: 4px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
   border: 1px solid var(--border);
   border-radius: 5px;
   background: #fff;
@@ -32,6 +35,12 @@
   color: var(--text);
   transition: background 0.12s;
   white-space: nowrap;
+}
+
+.btn .material-symbols-rounded {
+  font-size: 15px;
+  line-height: 1;
+  flex-shrink: 0;
 }
 .btn:hover { background: #f3f3f3; }
 .btn.active { background: #111; color: #fff; border-color: #111; }
@@ -44,10 +53,15 @@
   font-weight: 600;
   padding: 4px 16px;
 }
+
+.mode-toggle { width: 100px; justify-content: center; }
 .btn-cta:hover { background: #1565c0; border-color: #1565c0; }
 .btn-cta.active { background: #0d47a1; border-color: #0d47a1; color: #fff; }
 
 .btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   background: none;
   border: none;
   cursor: pointer;
@@ -59,6 +73,8 @@
   flex-shrink: 0;
 }
 .btn-cancel:hover { background: #eee; color: var(--text); }
+
+.btn-cancel .material-symbols-rounded { font-size: 14px; line-height: 1; }
 
 /* ── Content (left + right) ─────────────────────────────────── */
 .content {
@@ -78,6 +94,7 @@
   border-right: 1px solid var(--border);
   overflow: hidden;
   flex-shrink: 0;
+  position: relative;
 }
 
 .sidebar-top {
@@ -113,6 +130,9 @@
 }
 
 .btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   background: none;
   border: none;
   cursor: pointer;
@@ -122,6 +142,8 @@
   border-radius: 3px;
 }
 .btn-action:hover { background: #f0f0f0; color: var(--text); }
+
+.btn-action .material-symbols-rounded { font-size: 14px; line-height: 1; }
 
 .action-sep { color: var(--border); font-size: 11px; }
 
@@ -136,6 +158,73 @@ body.selecting .sidebar-top {
   border-bottom-color: #f0c040;
 }
 body.selecting .status-hint { color: #8a6800; font-weight: 500; }
+
+/* ── Sidebar Help Overlay ───────────────────────────────────── */
+.sidebar-help-overlay {
+  position: absolute;
+  top: 80px;
+  left: 12px;
+  right: 12px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 8px;
+  padding: 16px 16px 14px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+  z-index: 30;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s;
+}
+
+body.axis-help .sidebar-help-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sidebar-help-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 14px;
+}
+
+.sidebar-help-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebar-help-steps li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 12px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.step-icon {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1976d2;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+
+.sidebar-help-tip {
+  font-size: 11px;
+  color: #888;
+  line-height: 1.5;
+  margin: 0;
+  padding: 10px 12px;
+  background: #f8f8f8;
+  border-radius: 6px;
+}
 
 /* Card list (scrollable) */
 .card-list {
@@ -153,7 +242,7 @@ body.selecting .status-hint { color: #8a6800; font-weight: 500; }
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: var(--muted);
+  color: var(--text);
   text-transform: uppercase;
   position: sticky;
   top: -1px;
@@ -526,6 +615,71 @@ body.result-mode .zone-bar {
   color: #555;
   line-height: 1.65;
 }
+
+/* ── Toast ──────────────────────────────────────────────────── */
+
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  background: #1a1a1a;
+  color: #fff;
+  padding: 9px 18px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s, transform 0.18s;
+  z-index: 9999;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── Share Modal ────────────────────────────────────────────── */
+
+.dialog--share {
+  min-width: 380px;
+  text-align: left;
+}
+
+.dialog-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.dialog-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.share-url-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.share-url-row input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 11px;
+  font-family: monospace;
+  color: var(--text);
+  background: #f5f5f5;
+  min-width: 0;
+  cursor: text;
+}
+
 
 /* ── Modal ──────────────────────────────────────────────────── */
 

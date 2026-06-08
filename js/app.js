@@ -49,8 +49,9 @@ let axisHelpVisible = false;
 
 // ── Init ───────────────────────────────────────────────────────────────────────
 
-function init() {
+async function init() {
   loadStorage();
+  await decodeStateFromHash();
   renderAxisNumbers();
   renderCardList();
   renderAllDots();
@@ -121,7 +122,7 @@ function deselect() {
 }
 
 function place(id, x, y) {
-  placements[id] = { x: round2(x), y: round2(y) };
+  placements[id] = { x: round1(x), y: round1(y) };
   save();
   removeDotEl(id);
   addDot(id, x, y);
@@ -142,15 +143,16 @@ function removePlacement(id) {
 
 // ── Result Mode ────────────────────────────────────────────────────────────────
 
-function toggleResultMode() {
-  resultMode = !resultMode;
+function setResultMode(on) {
+  resultMode = on;
   if (!resultMode && activeZone) clearZoneFocus();
   if (!resultMode) hideZoneInfoCard();
   document.body.classList.toggle('result-mode', resultMode);
-  const btn = document.getElementById('btnResult');
-  btn.classList.toggle('active', resultMode);
-  btn.textContent = resultMode ? '📊 一般模式' : '📊 結果模式';
+  document.getElementById('btnEdit').classList.toggle('hidden', !resultMode);
+  document.getElementById('btnResult').classList.toggle('hidden', resultMode);
 }
+
+function toggleResultMode() { setResultMode(!resultMode); }
 
 function toggleZoneFocus(zone) {
   if (activeZone === zone) { clearZoneFocus(); return; }
@@ -303,6 +305,171 @@ function deleteCustomSkill(id) {
   updateCount();
 }
 
+// ── Share via URL (binary pack v4) ────────────────────────────────────────────
+//
+// Binary layout (big-endian, then deflate-raw + base64):
+//   1B  version = 4
+//   2B  stdCount
+//   stdCount × [2B skillId, 2B x×10, 2B y×10]
+//   2B  customCount
+//   customCount × [2B nameLen, nameLen×B name(UTF-8),
+//                  1B catLen,  catLen×B cat(ASCII),
+//                  1B hasPos,  if hasPos: 2B x×10, 2B y×10]
+//   1B  colorCount
+//   colorCount × [1B r, 1B g, 1B b]   (CATEGORIES in order)
+
+function hexToRgb(hex) {
+  const n = parseInt(hex.replace('#', ''), 16);
+  return [(n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
+}
+
+function rgbToHex(r, g, b) {
+  return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
+async function encodeState() {
+  const enc = new TextEncoder();
+  const standardIds = new Set(SKILLS.filter(s => !s.custom).map(s => s.id));
+  const placed = Object.entries(placements)
+    .filter(([id]) => standardIds.has(parseInt(id)));
+
+  const customs = customSkills.map(s => {
+    const nameBytes = enc.encode(s.en);
+    const catBytes  = enc.encode(s.cat);
+    const pos = placements[s.id];
+    return { nameBytes, catBytes, pos };
+  });
+
+  let size = 1 + 2 + placed.length * 6 + 2;
+  for (const { nameBytes, catBytes, pos } of customs)
+    size += 2 + nameBytes.length + 1 + catBytes.length + 1 + (pos ? 4 : 0);
+  size += 1 + CATEGORIES.length * 3;
+
+  const buf   = new ArrayBuffer(size);
+  const view  = new DataView(buf);
+  const bytes = new Uint8Array(buf);
+  let off = 0;
+
+  view.setUint8(off++, 4);
+  view.setUint16(off, placed.length); off += 2;
+  for (const [id, pos] of placed) {
+    view.setUint16(off, parseInt(id)); off += 2;
+    view.setUint16(off, Math.round(pos.x * 10)); off += 2;
+    view.setUint16(off, Math.round(pos.y * 10)); off += 2;
+  }
+
+  view.setUint16(off, customs.length); off += 2;
+  for (const { nameBytes, catBytes, pos } of customs) {
+    view.setUint16(off, nameBytes.length); off += 2;
+    bytes.set(nameBytes, off); off += nameBytes.length;
+    view.setUint8(off++, catBytes.length);
+    bytes.set(catBytes, off); off += catBytes.length;
+    view.setUint8(off++, pos ? 1 : 0);
+    if (pos) {
+      view.setUint16(off, Math.round(pos.x * 10)); off += 2;
+      view.setUint16(off, Math.round(pos.y * 10)); off += 2;
+    }
+  }
+
+  view.setUint8(off++, CATEGORIES.length);
+  for (const cat of CATEGORIES) {
+    const [r, g, b] = hexToRgb(cat.color);
+    view.setUint8(off++, r); view.setUint8(off++, g); view.setUint8(off++, b);
+  }
+
+  const stream = new Blob([buf]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+  const compressed = await new Response(stream).arrayBuffer();
+  return btoa(String.fromCharCode(...new Uint8Array(compressed)));
+}
+
+async function decodeStateFromHash() {
+  const hash = location.hash;
+  if (!hash.startsWith('#share=')) return false;
+  try {
+    const compressed = Uint8Array.from(atob(hash.slice(7)), c => c.charCodeAt(0));
+    const stream = new Blob([compressed]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    const buf   = await new Response(stream).arrayBuffer();
+    const view  = new DataView(buf);
+    const bytes = new Uint8Array(buf);
+    const dec   = new TextDecoder();
+    let off = 0;
+
+    if (view.getUint8(off++) !== 4) return false;
+
+    const stdCount = view.getUint16(off); off += 2;
+    const newPlacements = {};
+    for (let i = 0; i < stdCount; i++) {
+      const id = view.getUint16(off); off += 2;
+      const x  = view.getUint16(off) / 10; off += 2;
+      const y  = view.getUint16(off) / 10; off += 2;
+      newPlacements[id] = { x, y };
+    }
+
+    customSkills.forEach(s => {
+      const i = SKILLS.findIndex(sk => sk.id === s.id);
+      if (i !== -1) SKILLS.splice(i, 1);
+    });
+    customSkills = [];
+
+    const customCount = view.getUint16(off); off += 2;
+    let nextId = 10000;
+    for (let i = 0; i < customCount; i++) {
+      const nameLen = view.getUint16(off); off += 2;
+      const name    = dec.decode(bytes.slice(off, off + nameLen)); off += nameLen;
+      const catLen  = view.getUint8(off++);
+      const cat     = dec.decode(bytes.slice(off, off + catLen)); off += catLen;
+      const hasPos  = view.getUint8(off++);
+      const skill   = { id: nextId++, en: name, zh: name, cat, custom: true };
+      SKILLS.push(skill);
+      customSkills.push(skill);
+      if (hasPos) {
+        const x = view.getUint16(off) / 10; off += 2;
+        const y = view.getUint16(off) / 10; off += 2;
+        newPlacements[skill.id] = { x, y };
+      }
+    }
+
+    const colorCount = view.getUint8(off++);
+    for (let i = 0; i < colorCount && i < CATEGORIES.length; i++) {
+      const r = view.getUint8(off++), g = view.getUint8(off++), b = view.getUint8(off++);
+      CATEGORIES[i].color = rgbToHex(r, g, b);
+    }
+    saveCatColors();
+
+    placements = newPlacements;
+    saveCustomSkills();
+    save();
+    history.replaceState(null, '', location.pathname);
+    return true;
+  } catch { return false; }
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+async function shareURL() {
+  const encoded = await encodeState();
+  const url = location.origin + location.pathname + '#share=' + encoded;
+  try {
+    await navigator.clipboard.writeText(url);
+    showToast('連結已複製到剪貼簿');
+  } catch {
+    const input = document.getElementById('shareUrlInput');
+    input.value = url;
+    document.getElementById('shareOverlay').classList.remove('hidden');
+    input.select();
+  }
+}
+
+function closeShareModal() {
+  document.getElementById('shareOverlay').classList.add('hidden');
+}
+
 // ── Export / Import ────────────────────────────────────────────────────────────
 
 function exportJSON() {
@@ -315,6 +482,7 @@ function exportJSON() {
   });
   a.click();
   URL.revokeObjectURL(a.href);
+  showToast('已匯出 JSON');
 }
 
 function importJSON(file) {
@@ -343,8 +511,9 @@ function importJSON(file) {
       renderCardList();
       updateCount();
       updateZoneCounts();
+      showToast('匯入成功');
     } catch {
-      alert('無法讀取檔案，請確認是由本工具匯出的 JSON。');
+      showToast('無法讀取檔案，請確認格式正確');
     }
   });
 }
@@ -359,6 +528,7 @@ function resetAll() {
   updateCount();
   updateZoneCounts();
   deselect();
+  showToast('已清除所有放置紀錄');
 }
 
 // ── Events ─────────────────────────────────────────────────────────────────────
@@ -367,7 +537,8 @@ function bindEvents() {
   document.getElementById('matrix').addEventListener('click', onMatrixClick);
   document.getElementById('btnHelp').addEventListener('click', toggleAxisHelp);
   document.getElementById('btnGrid').addEventListener('click', toggleGrid);
-  document.getElementById('btnResult').addEventListener('click', toggleResultMode);
+  document.getElementById('btnEdit').addEventListener('click',   () => setResultMode(false));
+  document.getElementById('btnResult').addEventListener('click', () => setResultMode(true));
 
   document.getElementById('btnReset').addEventListener('click', () => {
     document.getElementById('overlay').classList.remove('hidden');
@@ -384,6 +555,20 @@ function bindEvents() {
   document.getElementById('btnExpandAll').addEventListener('click', expandAll);
   document.getElementById('btnCollapseAll').addEventListener('click', collapseAll);
 
+  document.getElementById('btnShare').addEventListener('click', shareURL);
+  document.getElementById('btnCopyUrl').addEventListener('click', () => {
+    const input = document.getElementById('shareUrlInput');
+    navigator.clipboard.writeText(input.value).then(() => {
+      const btn = document.getElementById('btnCopyUrl');
+      const orig = btn.textContent;
+      btn.textContent = '已複製！';
+      setTimeout(() => { btn.textContent = orig; }, 1800);
+    });
+  });
+  document.getElementById('btnCloseShare').addEventListener('click', closeShareModal);
+  document.getElementById('shareOverlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeShareModal();
+  });
   document.getElementById('btnExport').addEventListener('click', exportJSON);
   document.getElementById('btnImport').addEventListener('click', () => {
     document.getElementById('fileImport').click();
