@@ -135,6 +135,14 @@ function renderAxisNumbers() {
   }
 }
 
+function classifyZone(x, y) {
+  if (x >= 25 && x < 40 && y < 50) return 'danger';
+  if (x < 50 && y < 50) return 'tl';
+  if (x >= 50 && y < 50) return 'tr';
+  if (x < 50) return 'bl';
+  return 'br';
+}
+
 function addDot(id, x, y) {
   const skill = SKILLS.find(s => s.id === id);
   if (!skill) return;
@@ -143,10 +151,11 @@ function addDot(id, x, y) {
 
   const dot = document.createElement('div');
   dot.className = 'pdot' + (flip ? ' flip' : '') + (selectedId === id ? ' selected-dot' : '');
-  dot.dataset.id  = id;
-  dot.dataset.cat = skill.cat;
-  dot.style.left  = x + '%';
-  dot.style.top   = y + '%';
+  dot.dataset.id   = id;
+  dot.dataset.cat  = skill.cat;
+  dot.dataset.zone = classifyZone(x, y);
+  dot.style.left   = x + '%';
+  dot.style.top    = y + '%';
   dot.title = `${skill.en} / ${skill.zh}`;
 
   dot.innerHTML = `

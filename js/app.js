@@ -6,6 +6,7 @@ let placements   = {};     // { skillId: { x, y } }  x/y in 0–100 %
 let selectedId   = null;
 let activeDotId  = null;   // dot showing its remove button
 let resultMode   = false;
+let activeZone   = null;   // zone currently highlighted ('tl'|'danger'|'tr'|'bl'|'br'|null)
 let gridVisible  = false;
 let collapsed    = {};     // { catId: true } — persisted
 let highlightCat = null;   // category id being highlighted on matrix
@@ -18,6 +19,7 @@ function init() {
   renderCardList();
   renderAllDots();
   updateCount();
+  updateZoneCounts();
   bindEvents();
   const sel = document.getElementById('addSkillCat');
   CATEGORIES.forEach(cat => {
@@ -89,6 +91,7 @@ function place(id, x, y) {
   addDot(id, x, y);
   updateCardItem(id);
   updateCount();
+  updateZoneCounts();
 }
 
 function removePlacement(id) {
@@ -98,17 +101,46 @@ function removePlacement(id) {
   if (selectedId === id) deselect();
   updateCardItem(id);
   updateCount();
+  updateZoneCounts();
 }
 
-// Update a single card item without re-rendering the full list
 // ── Result Mode ────────────────────────────────────────────────────────────────
 
 function toggleResultMode() {
   resultMode = !resultMode;
+  if (!resultMode && activeZone) clearZoneFocus();
   document.body.classList.toggle('result-mode', resultMode);
   const btn = document.getElementById('btnResult');
   btn.classList.toggle('active', resultMode);
   btn.textContent = resultMode ? '📊 一般模式' : '📊 結果模式';
+}
+
+function toggleZoneFocus(zone) {
+  if (activeZone === zone) { clearZoneFocus(); return; }
+  if (activeZone) document.body.classList.remove(`zone-focus-${activeZone}`);
+  activeZone = zone;
+  document.body.classList.add('zone-focused', `zone-focus-${zone}`);
+  document.querySelectorAll('.zone-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.zone === zone);
+  });
+}
+
+function clearZoneFocus() {
+  if (activeZone) document.body.classList.remove(`zone-focus-${activeZone}`);
+  document.body.classList.remove('zone-focused');
+  activeZone = null;
+  document.querySelectorAll('.zone-btn').forEach(b => b.classList.remove('active'));
+}
+
+function updateZoneCounts() {
+  const counts = { tl: 0, danger: 0, tr: 0, bl: 0, br: 0 };
+  Object.values(placements).forEach(({ x, y }) => {
+    counts[classifyZone(x, y)]++;
+  });
+  Object.keys(counts).forEach(z => {
+    const el = document.getElementById(`zcount-${z}`);
+    if (el) el.textContent = counts[z];
+  });
 }
 
 function toggleGrid() {
@@ -186,6 +218,7 @@ function importJSON(file) {
       renderAllDots();
       renderCardList();
       updateCount();
+      updateZoneCounts();
     } catch {
       alert('無法讀取檔案，請確認是由本工具匯出的 JSON。');
     }
@@ -200,6 +233,7 @@ function resetAll() {
   document.getElementById('dotsLayer').innerHTML = '';
   renderCardList();
   updateCount();
+  updateZoneCounts();
   deselect();
 }
 
@@ -252,6 +286,10 @@ function bindEvents() {
   document.getElementById('btnCancelAdd').addEventListener('click', () => {
     document.getElementById('addSkillForm').classList.add('hidden');
     document.getElementById('addSkillName').value = '';
+  });
+
+  document.querySelectorAll('.zone-btn').forEach(btn => {
+    btn.addEventListener('click', () => toggleZoneFocus(btn.dataset.zone));
   });
 
   document.getElementById('addSkillName').addEventListener('keydown', e => {

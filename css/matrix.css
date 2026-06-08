@@ -2,7 +2,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 8px 14px 10px 10px;
+  padding: 8px 14px 40px 10px;
   min-width: 0;
 }
 
@@ -301,6 +301,35 @@ body.result-mode .zone               { opacity: 1; }
 body.result-mode .sweet-spot-ellipse { opacity: 1; }
 body.result-mode .cherry-on-top      { opacity: 1; }
 body.result-mode .spot-label         { opacity: 1; }
+
+/* ── Zone Focus (result mode toggles) ──────────────────────── */
+
+/* Dim everything when any zone is focused */
+body.zone-focused .zone               { opacity: 0.12; transition: opacity 0.2s; }
+body.zone-focused .sweet-spot-ellipse { opacity: 0.1;  transition: opacity 0.2s; }
+body.zone-focused .cherry-on-top      { opacity: 0.1;  transition: opacity 0.2s; }
+body.zone-focused .spot-label         { opacity: 0.1;  transition: opacity 0.2s; }
+body.zone-focused .pdot               { opacity: 0.12; transition: opacity 0.2s; }
+
+/* Restore focused zone + its dots */
+body.zone-focus-tl    .zone-tl    { opacity: 1; }
+body.zone-focus-danger .zone-danger { opacity: 1; }
+body.zone-focus-tr    .zone-tr    { opacity: 1; }
+body.zone-focus-bl    .zone-bl    { opacity: 1; }
+body.zone-focus-br    .zone-br    { opacity: 1; }
+
+/* TL focus also includes danger dots (danger is a TL sub-zone) */
+body.zone-focus-tl .pdot[data-zone="tl"],
+body.zone-focus-tl .pdot[data-zone="danger"]  { opacity: 1; }
+body.zone-focus-danger .pdot[data-zone="danger"] { opacity: 1; }
+body.zone-focus-tr .pdot[data-zone="tr"]         { opacity: 1; }
+body.zone-focus-bl .pdot[data-zone="bl"]         { opacity: 1; }
+body.zone-focus-br .pdot[data-zone="br"]         { opacity: 1; }
+
+/* Sweet-spot shapes stay visible when TR (sweet spot) is focused */
+body.zone-focus-tr .sweet-spot-ellipse,
+body.zone-focus-tr .cherry-on-top,
+body.zone-focus-tr .spot-label { opacity: 1; }
 
 /* ── Placed Dots ────────────────────────────────────────────── */
 
