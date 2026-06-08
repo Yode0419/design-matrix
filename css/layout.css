@@ -37,6 +37,15 @@
 .btn.active { background: #111; color: #fff; border-color: #111; }
 .btn-danger { color: #c0392b; border-color: #ddb8b4; }
 .btn-danger:hover { background: #fef4f3; }
+.btn-cta {
+  background: #1976d2;
+  color: #fff;
+  border-color: #1976d2;
+  font-weight: 600;
+  padding: 4px 16px;
+}
+.btn-cta:hover { background: #1565c0; border-color: #1565c0; }
+.btn-cta.active { background: #0d47a1; border-color: #0d47a1; color: #fff; }
 
 .btn-cancel {
   background: none;
