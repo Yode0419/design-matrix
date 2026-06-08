@@ -8,7 +8,8 @@
 }
 
 .matrix-credit {
-  text-align: right;
+  display: flex;
+  justify-content: space-between;
   font-size: 10.5px;
   color: var(--muted);
   opacity: 0.6;
@@ -41,7 +42,7 @@
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.1em;
-  color: #bbb;
+  color: var(--text);
   text-transform: uppercase;
   user-select: none;
 }
@@ -394,7 +395,7 @@ body.zone-focus-sweet .pdot[data-sweet="1"] { opacity: 1; }
   white-space: nowrap;
   box-shadow: 0 3px 10px rgba(0,0,0,0.18);
   border: 1px solid rgba(0,0,0,0.08);
-  color: #222;
+  color: #1a1a1a;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.15s;
