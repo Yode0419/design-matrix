@@ -8,6 +8,7 @@ const CATEGORIES = [
   { id: 'writing',  label: 'UX 文案',   color: '#f57c00' },
   { id: 'testing',  label: '評估測試',   color: '#c62828' },
   { id: 'frontend', label: '前端開發',   color: '#283593' },
+  { id: 'other',    label: '其他',       color: '#757575' },
 ];
 
 const SKILLS = [

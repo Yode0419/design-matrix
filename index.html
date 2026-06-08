@@ -44,6 +44,17 @@
         </div>
       </div>
       <div class="card-list" id="cardList"></div>
+      <div class="add-skill-row">
+        <button class="btn-action btn-add-skill" id="btnAddSkill">＋ 新增自訂技能</button>
+      </div>
+      <div id="addSkillForm" class="add-skill-form hidden">
+        <input id="addSkillName" type="text" placeholder="技能名稱" maxlength="30" autocomplete="off">
+        <select id="addSkillCat"></select>
+        <div class="add-skill-actions">
+          <button class="btn" id="btnConfirmAdd">新增</button>
+          <button class="btn" id="btnCancelAdd">取消</button>
+        </div>
+      </div>
     </aside>
 
     <!-- ── Right: Matrix ── -->

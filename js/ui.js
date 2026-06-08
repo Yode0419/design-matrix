@@ -56,6 +56,19 @@ function renderCardList() {
       `;
 
       item.addEventListener('click', () => onCardClick(skill.id));
+
+      if (skill.custom) {
+        const delBtn = document.createElement('button');
+        delBtn.className = 'card-delete-btn';
+        delBtn.title = '刪除此技能';
+        delBtn.textContent = '✕';
+        delBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          deleteCustomSkill(skill.id);
+        });
+        item.appendChild(delBtn);
+      }
+
       cardsEl.appendChild(item);
     });
 

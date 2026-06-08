@@ -19,6 +19,13 @@ function init() {
   renderAllDots();
   updateCount();
   bindEvents();
+  const sel = document.getElementById('addSkillCat');
+  CATEGORIES.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat.id;
+    opt.textContent = cat.label;
+    sel.appendChild(opt);
+  });
 }
 
 // ── Interactions ───────────────────────────────────────────────────────────────
@@ -110,11 +117,41 @@ function toggleGrid() {
   document.getElementById('btnGrid').textContent = gridVisible ? '隱藏格線' : '顯示格線';
 }
 
+// ── Custom Skills ──────────────────────────────────────────────────────────────
+
+function addCustomSkill(name, catId) {
+  const trimmed = name.trim();
+  if (!trimmed) return;
+  const maxId = customSkills.reduce((m, s) => Math.max(m, s.id), 9999);
+  const skill = { id: maxId + 1, en: trimmed, zh: trimmed, cat: catId, custom: true };
+  SKILLS.push(skill);
+  customSkills.push(skill);
+  saveCustomSkills();
+  renderCardList();
+  updateCount();
+}
+
+function deleteCustomSkill(id) {
+  if (placements[id] !== undefined) {
+    delete placements[id];
+    save();
+    removeDotEl(id);
+  }
+  if (selectedId === id) deselect();
+  const si = SKILLS.findIndex(s => s.id === id);
+  if (si !== -1) SKILLS.splice(si, 1);
+  const ci = customSkills.findIndex(s => s.id === id);
+  if (ci !== -1) customSkills.splice(ci, 1);
+  saveCustomSkills();
+  renderCardList();
+  updateCount();
+}
+
 // ── Export / Import ────────────────────────────────────────────────────────────
 
 function exportJSON() {
   const now = new Date().toISOString();
-  const data = { version: 1, exportedAt: now, placements };
+  const data = { version: 1, exportedAt: now, placements, customSkills };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = Object.assign(document.createElement('a'), {
     href: URL.createObjectURL(blob),
@@ -128,8 +165,22 @@ function importJSON(file) {
   if (!file) return;
   file.text().then(text => {
     try {
-      const { placements: p } = JSON.parse(text);
+      const { placements: p, customSkills: cs } = JSON.parse(text);
       if (!p || typeof p !== 'object') throw new Error();
+
+      // Remove existing custom skills from SKILLS
+      customSkills.forEach(s => {
+        const i = SKILLS.findIndex(sk => sk.id === s.id);
+        if (i !== -1) SKILLS.splice(i, 1);
+      });
+      customSkills = [];
+
+      if (Array.isArray(cs)) {
+        customSkills = cs;
+        cs.forEach(s => SKILLS.push(s));
+      }
+      saveCustomSkills();
+
       placements = p;
       save();
       renderAllDots();
@@ -181,6 +232,31 @@ function bindEvents() {
   document.getElementById('fileImport').addEventListener('change', e => {
     importJSON(e.target.files[0]);
     e.target.value = '';
+  });
+
+  document.getElementById('btnAddSkill').addEventListener('click', () => {
+    const form = document.getElementById('addSkillForm');
+    form.classList.toggle('hidden');
+    if (!form.classList.contains('hidden')) document.getElementById('addSkillName').focus();
+  });
+
+  document.getElementById('btnConfirmAdd').addEventListener('click', () => {
+    const name = document.getElementById('addSkillName').value;
+    const catId = document.getElementById('addSkillCat').value;
+    if (!name.trim()) { document.getElementById('addSkillName').focus(); return; }
+    addCustomSkill(name, catId);
+    document.getElementById('addSkillName').value = '';
+    document.getElementById('addSkillForm').classList.add('hidden');
+  });
+
+  document.getElementById('btnCancelAdd').addEventListener('click', () => {
+    document.getElementById('addSkillForm').classList.add('hidden');
+    document.getElementById('addSkillName').value = '';
+  });
+
+  document.getElementById('addSkillName').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btnConfirmAdd').click();
+    if (e.key === 'Escape') document.getElementById('btnCancelAdd').click();
   });
 
   document.addEventListener('keydown', e => { if (e.key === 'Escape') deselect(); });
