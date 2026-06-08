@@ -124,7 +124,6 @@ body.grid-hidden .axis-numbers {
 }
 
 /* ── Zones (result mode) ────────────────────────────────────── */
-/* ── Quadrant Zone Overlays ─────────────────────────────────── */
 .zone {
   position: absolute;
   display: flex;

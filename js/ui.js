@@ -71,16 +71,13 @@ function toggleCat(catId) {
   if (group) group.classList.toggle('collapsed', !!collapsed[catId]);
 }
 
-function expandAll() {
-  CATEGORIES.forEach(cat => { collapsed[cat.id] = false; });
-  saveCollapsed();
-  document.querySelectorAll('.cat-group').forEach(g => g.classList.remove('collapsed'));
-}
+function expandAll()   { setAllCollapsed(false); }
+function collapseAll() { setAllCollapsed(true);  }
 
-function collapseAll() {
-  CATEGORIES.forEach(cat => { collapsed[cat.id] = true; });
+function setAllCollapsed(value) {
+  CATEGORIES.forEach(cat => { collapsed[cat.id] = value; });
   saveCollapsed();
-  document.querySelectorAll('.cat-group').forEach(g => g.classList.add('collapsed'));
+  document.querySelectorAll('.cat-group').forEach(g => g.classList.toggle('collapsed', value));
 }
 
 function renderAllDots() {

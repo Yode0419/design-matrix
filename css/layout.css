@@ -273,7 +273,7 @@ body.cat-highlight .pdot.cat-match { opacity: 1; }
   padding-right: 8px;
 }
 
-/* ── Matrix Panel (right 2/3) ───────────────────────────────── */
+/* ── Modal ──────────────────────────────────────────────────── */
 
 .overlay {
   position: fixed;

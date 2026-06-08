@@ -113,11 +113,12 @@ function toggleGrid() {
 // ── Export / Import ────────────────────────────────────────────────────────────
 
 function exportJSON() {
-  const data = { version: 1, exportedAt: new Date().toISOString(), placements };
+  const now = new Date().toISOString();
+  const data = { version: 1, exportedAt: now, placements };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = Object.assign(document.createElement('a'), {
     href: URL.createObjectURL(blob),
-    download: `design-matrix-${new Date().toISOString().slice(0,10)}.json`,
+    download: `design-matrix-${now.slice(0,10)}.json`,
   });
   a.click();
   URL.revokeObjectURL(a.href);
@@ -145,8 +146,6 @@ function importJSON(file) {
 function resetAll() {
   placements = {};
   save();
-  selectedId = null;
-  document.body.classList.remove('selecting');
   document.getElementById('dotsLayer').innerHTML = '';
   renderCardList();
   updateCount();
