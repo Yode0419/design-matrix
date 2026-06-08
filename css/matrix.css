@@ -155,6 +155,25 @@ body.grid-hidden #guideLayer {
   user-select: none;
 }
 
+/* ── Expert Level Zone Frames (axis-help mode) ──────────────── */
+.expert-zone {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 3;
+  border: 1.5px dashed;
+}
+
+.expert-zone[data-level="1"] { left: 50%;   width: 12.5%; border-color: rgba(245,195,90,0.55);  background: rgba(245,195,90,0.05); }
+.expert-zone[data-level="2"] { left: 62.5%; width: 12.5%; border-color: rgba(100,181,232,0.55); background: rgba(100,181,232,0.05); }
+.expert-zone[data-level="3"] { left: 75%;   width: 12.5%; border-color: rgba(77,182,172,0.55);  background: rgba(77,182,172,0.05); }
+.expert-zone[data-level="4"] { left: 87.5%; width: 12.5%; border-color: rgba(244,143,177,0.55); background: rgba(244,143,177,0.05); }
+
+body.axis-help .expert-zone { opacity: 1; }
+
 /* ── Zones (result mode) ────────────────────────────────────── */
 .zone {
   position: absolute;
