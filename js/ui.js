@@ -5,7 +5,8 @@ function renderCardList() {
   list.innerHTML = '';
 
   CATEGORIES.forEach(cat => {
-    const skills   = SKILLS.filter(s => s.cat === cat.id);
+    const skills      = SKILLS.filter(s => s.cat === cat.id);
+    const placedCount = skills.filter(s => placements[s.id] !== undefined).length;
     const isCollapsed = !!collapsed[cat.id];
 
     // Group wrapper
@@ -17,9 +18,9 @@ function renderCardList() {
     const header = document.createElement('div');
     header.className = 'cat-header';
     header.innerHTML = `
-      <span class="cat-color-bar" style="background:${cat.color}"></span>
+      <span class="cat-color-bar" style="background:${cat.color}" title="點擊更換分類顏色"></span>
       <span class="cat-label">${esc(cat.label)}</span>
-      <span class="cat-count">${skills.length}</span>
+      <span class="cat-count">${placedCount}/${skills.length}</span>
       <button class="cat-hl-btn" data-cat="${cat.id}" title="在矩陣中高亮此分類" style="color:${cat.color}">◉</button>
       <span class="cat-chevron">▾</span>
     `;
@@ -27,6 +28,18 @@ function renderCardList() {
     header.querySelector('.cat-hl-btn').addEventListener('click', e => {
       e.stopPropagation();
       setHighlightCat(highlightCat === cat.id ? null : cat.id);
+    });
+    header.querySelector('.cat-color-bar').addEventListener('click', e => {
+      e.stopPropagation();
+      const picker = document.createElement('input');
+      picker.type  = 'color';
+      picker.value = cat.color;
+      picker.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+      document.body.appendChild(picker);
+      picker.addEventListener('input',  () => setCatColor(cat.id, picker.value));
+      picker.addEventListener('change', () => { setCatColor(cat.id, picker.value); picker.remove(); });
+      picker.addEventListener('cancel', () => picker.remove());
+      picker.click();
     });
     group.appendChild(header);
 
@@ -273,6 +286,17 @@ function updateCardItem(id) {
 
   el.classList.toggle('placed', placed);
 
+  // Sync cat-count for this card's group
+  const skill = SKILLS.find(s => s.id === id);
+  if (skill) {
+    const group = document.querySelector(`.cat-group[data-cat="${skill.cat}"]`);
+    if (group) {
+      const catSkills = SKILLS.filter(s => s.cat === skill.cat);
+      const placed2   = catSkills.filter(s => placements[s.id] !== undefined).length;
+      group.querySelector('.cat-count').textContent = `${placed2}/${catSkills.length}`;
+    }
+  }
+
   // Update the placed mark
   let mark = el.querySelector('.card-placed-mark');
   if (placed && !mark) {
@@ -297,6 +321,29 @@ function syncHighlights() {
 
 function catColor(catId) {
   return CATEGORIES.find(c => c.id === catId)?.color ?? '#888';
+}
+
+function setCatColor(catId, color) {
+  const cat = CATEGORIES.find(c => c.id === catId);
+  if (!cat) return;
+  cat.color = color;
+  saveCatColors();
+
+  // Update sidebar group
+  const group = document.querySelector(`.cat-group[data-cat="${catId}"]`);
+  if (group) {
+    group.querySelector('.cat-color-bar').style.background = color;
+    group.querySelector('.cat-hl-btn').style.color = color;
+    group.querySelectorAll('.card-item').forEach(el => {
+      el.style.borderLeftColor = color;
+      el.querySelector('.card-color-dot').style.background = color;
+    });
+  }
+
+  // Update matrix dots
+  document.querySelectorAll(`.pdot[data-cat="${catId}"] .pdot-circle`).forEach(el => {
+    el.style.background = color;
+  });
 }
 
 function truncate(str, len) {

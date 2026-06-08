@@ -164,6 +164,12 @@ body.selecting .status-hint { color: #8a6800; font-weight: 500; }
   height: 10px;
   border-radius: 3px;
   flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.cat-color-bar:hover {
+  transform: scale(1.25);
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.15);
 }
 
 .cat-label { flex: 1; }

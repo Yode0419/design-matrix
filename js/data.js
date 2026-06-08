@@ -1,13 +1,13 @@
 const CATEGORIES = [
-  { id: 'creative', label: '創意思考',   color: '#388e3c' },
-  { id: 'business', label: '商業知識',   color: '#1565c0' },
-  { id: 'comm',     label: '溝通合作',   color: '#c2185b' },
-  { id: 'research', label: '使用者研究', color: '#e64a19' },
-  { id: 'ux',       label: 'UX 設計',   color: '#7b1fa2' },
-  { id: 'ui',       label: 'UI / 視覺', color: '#00796b' },
-  { id: 'writing',  label: 'UX 文案',   color: '#f57c00' },
-  { id: 'testing',  label: '評估測試',   color: '#c62828' },
-  { id: 'frontend', label: '前端開發',   color: '#283593' },
+  { id: 'creative', label: '創意思考',   color: '#e53935' },
+  { id: 'business', label: '商業知識',   color: '#546e7a' },
+  { id: 'comm',     label: '溝通合作',   color: '#43a047' },
+  { id: 'research', label: '使用者研究', color: '#8e24aa' },
+  { id: 'ux',       label: 'UX 設計',   color: '#00acc1' },
+  { id: 'ui',       label: 'UI / 視覺', color: '#fb8c00' },
+  { id: 'writing',  label: 'UX 文案',   color: '#1e88e5' },
+  { id: 'testing',  label: '評估測試',   color: '#e91e63' },
+  { id: 'frontend', label: '前端開發',   color: '#fdd835' },
   { id: 'other',    label: '其他',       color: '#757575' },
 ];
 

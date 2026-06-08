@@ -1,6 +1,7 @@
 // Storage
 
-const LS_CUSTOM = 'dm-custom';
+const LS_CUSTOM     = 'dm-custom';
+const LS_CAT_COLORS = 'dm-cat-colors';
 let customSkills = [];
 
 function loadStorage() {
@@ -12,6 +13,19 @@ function loadStorage() {
     customSkills = JSON.parse(localStorage.getItem(LS_CUSTOM)) || [];
     customSkills.forEach(s => SKILLS.push(s));
   } catch { customSkills = []; }
+  try {
+    const saved = JSON.parse(localStorage.getItem(LS_CAT_COLORS)) || {};
+    Object.entries(saved).forEach(([id, color]) => {
+      const cat = CATEGORIES.find(c => c.id === id);
+      if (cat) cat.color = color;
+    });
+  } catch {}
+}
+
+function saveCatColors() {
+  const map = {};
+  CATEGORIES.forEach(c => { map[c.id] = c.color; });
+  localStorage.setItem(LS_CAT_COLORS, JSON.stringify(map));
 }
 
 function save() {
